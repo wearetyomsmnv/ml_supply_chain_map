@@ -16,7 +16,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
 /* ── Layout Grid ── */
 #app {
   display: grid;
-  grid-template-rows: 56px 1fr 120px;
+  grid-template-rows: 56px 1fr 140px;
   grid-template-columns: 340px 1fr;
   grid-template-areas:
     "header header"
@@ -186,7 +186,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   color: #445; font-weight: 600; margin-bottom: 8px;
 }
 .timeline-track {
-  position: relative; height: 60px; margin-top: 4px;
+  position: relative; height: 80px; margin-top: 4px;
 }
 .timeline-axis {
   position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
@@ -207,8 +207,14 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
 }
 .timeline-label {
   font-size: 9px; color: #667; text-align: center; margin-top: 4px;
-  max-width: 120px; line-height: 1.2; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
+  max-width: 140px; line-height: 1.2;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.timeline-incident.stagger-up { bottom: 40px !important; }
+.timeline-connector {
+  position: absolute; left: 50%; width: 1px; background: rgba(255,23,68,0.3);
+  transform: translateX(-50%);
 }
 .timeline-date {
   font-family: 'JetBrains Mono', monospace; font-size: 9px;
@@ -284,7 +290,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
 <div id="app">
   <!-- HEADER -->
   <header id="header">
-    <h1>ML SUPPLY CHAIN &middot; DEPENDENCY MAP</h1>
+    <h1>КАРТА ЗАВИСИМОСТЕЙ &middot; ML SUPPLY CHAIN</h1>
     <div class="header-controls">
       <div class="layer-filters" id="layerFilters"></div>
       <button class="sim-btn" id="simBtn" onclick="toggleSimMode()">&#x26A0; Симуляция компрометации</button>
@@ -333,7 +339,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
         </div>
       </div>
       <div class="detail-row">
-        <span class="detail-row-label">Risk Score</span>
+        <span class="detail-row-label">Уровень риска</span>
         <span class="detail-row-value" id="detailRisk"></span>
       </div>
       <div class="detail-row">
@@ -380,12 +386,12 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   <div id="main">
     <svg id="graphSvg"></svg>
     <div class="graph-tooltip" id="tooltip"></div>
-    <div class="graph-hint" id="graphHint">scroll: zoom &middot; drag: pan &middot; click: детали</div>
+    <div class="graph-hint" id="graphHint">колёсико: масштаб &middot; перетаскивание: навигация &middot; клик: детали</div>
   </div>
 
   <!-- TIMELINE -->
   <div id="timeline">
-    <div class="timeline-title">Таймлайн инцидентов ML supply chain</div>
+    <div class="timeline-title">Хронология инцидентов в ML-экосистеме</div>
     <div class="timeline-track" id="timelineTrack">
       <div class="timeline-axis"></div>
     </div>
@@ -428,6 +434,15 @@ const NODES = [
   { id: 'pandas',       label: 'pandas',           layer: 'base',      downloads: 437000000,  risk: 50, depRepos: 25000, maintainers: '~15 core',
     blast: '437M загрузок/мес. Слой обработки данных для большинства ML-систем.',
     cves: [], attacks: [], shape: 'circle' },
+  { id: 'scikit-learn', label: 'scikit-learn',     layer: 'base',      downloads: 159000000,  risk: 55, depRepos: 18000, maintainers: '~20 core',
+    blast: '159M загрузок/мес. Классический ML — классификация, регрессия, кластеризация. Зависит от numpy и scipy.',
+    cves: [], attacks: [], shape: 'circle' },
+  { id: 'pillow',       label: 'Pillow',           layer: 'base',      downloads: 120000000,  risk: 45, depRepos: 15000, maintainers: '~5 core',
+    blast: '120M загрузок/мес. Обработка изображений, критичен для всех CV-пайплайнов.',
+    cves: [], attacks: [], shape: 'circle' },
+  { id: 'matplotlib',   label: 'matplotlib',       layer: 'base',      downloads: 200000000,  risk: 40, depRepos: 20000, maintainers: '~15 core',
+    blast: '200M загрузок/мес. Визуализация данных, зависит от numpy. Используется повсеместно в ML-экосистеме.',
+    cves: [], attacks: [], shape: 'circle' },
   // ML Frameworks
   { id: 'pytorch',      label: 'PyTorch',          layer: 'framework', downloads: 70800000,   risk: 92, depRepos: 30000, maintainers: '7 core',
     blast: '70.8M загрузок/мес. Всего 7 core-мейнтейнеров — критическая концентрация. Поставляет 13 NVIDIA CUDA-библиотек. Основной фреймворк для LLM-тренировки и инференса.',
@@ -435,6 +450,9 @@ const NODES = [
     attacks: [{ date: '2022-12', desc: 'torchtriton dependency confusion — эксфильтрация SSH-ключей через DNS tunneling' }], shape: 'circle' },
   { id: 'tensorflow',   label: 'TensorFlow',       layer: 'framework', downloads: 21200000,   risk: 65, depRepos: 15000, maintainers: 'Google team',
     blast: '21.2M загрузок/мес. Широко используется в production-системах и на мобильных устройствах (TFLite).',
+    cves: [], attacks: [], shape: 'circle' },
+  { id: 'keras',         label: 'Keras',            layer: 'framework', downloads: 30000000,   risk: 55, depRepos: 10000, maintainers: 'Google/community',
+    blast: '30M загрузок/мес. Высокоуровневый API для TensorFlow и PyTorch. Широко используется для прототипирования и обучения моделей.',
     cves: [], attacks: [], shape: 'circle' },
   // HuggingFace ecosystem
   { id: 'transformers', label: 'transformers',     layer: 'hf',        downloads: 104500000,  risk: 85, depRepos: 28575, maintainers: 'HF team (~20)',
@@ -463,10 +481,21 @@ const NODES = [
   { id: 'peft',         label: 'peft',             layer: 'hf',        downloads: 7900000,    risk: 50, depRepos: 1500,  maintainers: 'HF team (~5)',
     blast: '7.9M загрузок/мес. Parameter-efficient fine-tuning — LoRA и другие адаптеры.',
     cves: [], attacks: [], shape: 'circle' },
-  // Serving
-  { id: 'vllm',         label: 'vLLM',             layer: 'serving',   downloads: 6500000,    risk: 72, depRepos: 2000,  maintainers: '~15 core',
-    blast: '5-8M загрузок/мес. Стандарт production LLM-сервинга. 60+ прямых зависимостей → ~150+ уникальных пакетов после транзитивного разрешения.',
+  { id: 'trl',          label: 'trl',              layer: 'hf',        downloads: 5000000,    risk: 50, depRepos: 800,   maintainers: 'HF team (~5)',
+    blast: '5M загрузок/мес. RLHF-тренировка моделей. Часть HF-кластера, зависит от transformers, pytorch, peft, accelerate, datasets.',
     cves: [], attacks: [], shape: 'circle' },
+  // Serving
+  { id: 'vllm',         label: 'vLLM',             layer: 'serving',   downloads: 6500000,    risk: 92, depRepos: 2000,  maintainers: '~15 core',
+    blast: '5-8M загрузок/мес. Стандарт production LLM-сервинга. 60+ прямых зависимостей → ~150+ уникальных пакетов после транзитивного разрешения.',
+    cves: [
+      { id: 'CVE-2025-32444', cvss: 10.0, desc: 'RCE через pickle-десериализацию в Mooncake-интеграции (ZeroMQ)' },
+      { id: 'CVE-2026-22778', cvss: 9.8, desc: 'RCE через обработку видео — heap overflow в FFmpeg/OpenCV' },
+      { id: 'CVE-2026-22807', cvss: 8.8, desc: 'RCE через auto_map загрузку динамических модулей HF' },
+      { id: 'CVE-2026-24779', cvss: 7.1, desc: 'SSRF в MediaConnector — обход валидации hostname' }
+    ],
+    attacks: [
+      { date: '2025-04', desc: 'CVE-2025-32444 CVSS 10.0 — pickle RCE через Mooncake ZeroMQ, неавторизованный доступ' }
+    ], shape: 'circle' },
   { id: 'onnx',         label: 'ONNX Runtime',     layer: 'serving',   downloads: 22900000,   risk: 60, depRepos: 5000,  maintainers: 'Microsoft',
     blast: '22.9M загрузок/мес. Кроссплатформенный инференс — используется Azure, Windows ML, многими edge-устройствами.',
     cves: [], attacks: [], shape: 'circle' },
@@ -475,9 +504,46 @@ const NODES = [
     cves: [],
     attacks: [{ date: '2022-12', desc: 'torchtriton dependency confusion — 2,717 загрузок вредоносного пакета за сутки' }], shape: 'circle' },
   // Applications
-  { id: 'langchain',    label: 'LangChain',        layer: 'app',       downloads: 187000000,  risk: 60, depRepos: 8000,  maintainers: 'LangChain Inc',
+  { id: 'langchain',    label: 'LangChain',        layer: 'app',       downloads: 187000000,  risk: 75, depRepos: 8000,  maintainers: 'LangChain Inc',
     blast: '187M загрузок/мес. Фреймворк LLM-приложений — связывает все слои экосистемы в production-системах.',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [
+      { id: 'CVE-2025-68664', cvss: 9.3, desc: '«LangGrinch» — injection через сериализацию, утечка секретов и RCE' },
+      { id: 'CVE-2025-68665', cvss: 8.6, desc: 'То же для JS-версии @langchain/core' }
+    ],
+    attacks: [
+      { date: '2025-12', desc: 'LangGrinch CVE-2025-68664 — утечка API-ключей и RCE через serialization injection' }
+    ], shape: 'circle' },
+  // New nodes from AI-Infra-Guard v3.6.2
+  { id: 'ollama',       label: 'Ollama',           layer: 'serving',   downloads: 5000000,    risk: 85, depRepos: 3000,  maintainers: 'Ollama Inc (~10)',
+    blast: '175K публичных серверов. RCE через OOB-write в GGUF, отсутствие аутентификации. Локальный инференс LLM.',
+    cves: [
+      { id: 'CVE-2025-63389', cvss: 8.5, desc: 'Отсутствие аутентификации API — несанкционированные операции с моделями' }
+    ], attacks: [], shape: 'circle' },
+  { id: 'mlflow',       label: 'MLflow',           layer: 'serving',   downloads: 20000000,   risk: 78, depRepos: 5000,  maintainers: 'LF AI (~20)',
+    blast: '20M загрузок/мес. ML-lifecycle, model registry. Directory traversal → RCE (CVE-2025-11201).',
+    cves: [
+      { id: 'CVE-2025-11201', cvss: 8.8, desc: 'Directory traversal в Tracking Server → удалённое выполнение кода' }
+    ], attacks: [], shape: 'circle' },
+  { id: 'jupyter',      label: 'Jupyter',          layer: 'base',      downloads: 30000000,   risk: 65, depRepos: 40000, maintainers: 'Jupyter team (~30)',
+    blast: '30M загрузок/мес. Основная IDE для ML. DOM clobbering через вредоносные ноутбуки (CVE-2024-43805).',
+    cves: [
+      { id: 'CVE-2024-43805', cvss: 7.6, desc: 'DOM Clobbering через вредоносные Markdown-ячейки в ноутбуках' }
+    ], attacks: [], shape: 'circle' },
+  { id: 'dask',         label: 'Dask',             layer: 'base',      downloads: 30000000,   risk: 70, depRepos: 8000,  maintainers: 'Dask team (~15)',
+    blast: '30M загрузок/мес. Распределённые вычисления. Pickle-десериализация → RCE (CVE-2024-10096).',
+    cves: [
+      { id: 'CVE-2024-10096', cvss: 8.0, desc: 'Pickle-десериализация в distributed server → удалённое выполнение команд' }
+    ], attacks: [], shape: 'circle' },
+  { id: 'langflow',     label: 'Langflow',         layer: 'app',       downloads: 2000000,    risk: 82, depRepos: 1500,  maintainers: 'DataStax (~15)',
+    blast: '2M загрузок/мес. 9 CVE, включая множественные RCE и code injection. Визуальный конструктор LLM-приложений.',
+    cves: [
+      { id: 'CVE-2025-3248', cvss: 9.8, desc: 'Неаутентифицированный RCE через /api/v1/validate/code — выполнение произвольного Python-кода' }
+    ], attacks: [], shape: 'circle' },
+  { id: 'dify',         label: 'Dify',             layer: 'app',       downloads: 3000000,    risk: 80, depRepos: 2000,  maintainers: 'Dify Inc (~20)',
+    blast: '3M загрузок/мес. Sandbox escape с root-правами (CVE-2025-3466, CVSS 9.8). LLM-платформа.',
+    cves: [
+      { id: 'CVE-2025-3466', cvss: 9.8, desc: 'Sandbox escape — выполнение кода с root-правами через code node' }
+    ], attacks: [], shape: 'circle' },
 ];
 
 // Edges: source DEPENDS ON target (arrow from source → target)
@@ -528,8 +594,51 @@ const EDGES = [
   // LangChain
   { source: 'langchain',    target: 'transformers' },
   { source: 'langchain',    target: 'pytorch' },
+  { source: 'langchain',    target: 'hf-hub' },
   // scipy → pandas
   { source: 'pandas',       target: 'scipy' },
+  // scikit-learn
+  { source: 'scikit-learn', target: 'numpy' },
+  { source: 'scikit-learn', target: 'scipy' },
+  // keras
+  { source: 'keras',        target: 'tensorflow' },
+  { source: 'keras',        target: 'numpy' },
+  // pillow
+  { source: 'pillow',       target: 'numpy' },
+  // matplotlib
+  { source: 'matplotlib',   target: 'numpy' },
+  // trl
+  { source: 'trl',          target: 'transformers' },
+  { source: 'trl',          target: 'pytorch' },
+  { source: 'trl',          target: 'hf-hub' },
+  { source: 'trl',          target: 'peft' },
+  { source: 'trl',          target: 'accelerate' },
+  { source: 'trl',          target: 'datasets' },
+  // Ollama
+  { source: 'ollama',       target: 'cuda' },
+  { source: 'ollama',       target: 'pytorch' },
+  // MLflow
+  { source: 'mlflow',       target: 'pytorch' },
+  { source: 'mlflow',       target: 'tensorflow' },
+  { source: 'mlflow',       target: 'numpy' },
+  { source: 'mlflow',       target: 'hf-hub' },
+  // Jupyter
+  { source: 'jupyter',      target: 'numpy' },
+  { source: 'jupyter',      target: 'scipy' },
+  { source: 'jupyter',      target: 'pandas' },
+  { source: 'jupyter',      target: 'matplotlib' },
+  // Dask
+  { source: 'dask',         target: 'numpy' },
+  { source: 'dask',         target: 'scipy' },
+  { source: 'dask',         target: 'pandas' },
+  // Langflow
+  { source: 'langflow',     target: 'langchain' },
+  { source: 'langflow',     target: 'transformers' },
+  { source: 'langflow',     target: 'hf-hub' },
+  // Dify
+  { source: 'dify',         target: 'langchain' },
+  { source: 'dify',         target: 'transformers' },
+  { source: 'dify',         target: 'hf-hub' },
 ];
 
 const INCIDENTS = [
@@ -543,6 +652,12 @@ const INCIDENTS = [
     desc: 'ReversingLabs: 7z вместо ZIP для обхода сканера. Payload выполнялся до ошибки парсера. Кроссплатформенные reverse shells.' },
   { id: 'inc5', date: '2025-04', label: 'CVE-2025-32434 CVSS 9.3', nodes: ['pytorch'],
     desc: 'Обход weights_only=True в torch.load() — RCE через "безопасную" загрузку. Затронуты все версии PyTorch ≤2.5.1.' },
+  { id: 'inc6', date: '2025-04', label: 'vLLM Mooncake RCE CVSS 10.0', nodes: ['vllm'],
+    desc: 'CVE-2025-32444: pickle-десериализация через ZeroMQ в Mooncake-интеграции. CVSS 10.0, неавторизованный RCE.' },
+  { id: 'inc7', date: '2025-12', label: 'LangGrinch — утечка секретов', nodes: ['langchain'],
+    desc: 'CVE-2025-68664: serialization injection в langchain-core. Утечка API-ключей через prompt injection + RCE.' },
+  { id: 'inc8', date: '2026-01', label: 'Ni8mare: n8n unauth RCE', nodes: ['langflow', 'dify'],
+    desc: 'CVE-2026-21858 CVSS 10.0: неаутентифицированный RCE в n8n. 100K+ серверов уязвимы. Волна атак на AI-workflow платформы.' },
 ];
 
 // ══════════════════════════════════════════════════
@@ -661,11 +776,11 @@ function buildGraph() {
   // Cluster centers
   const layerCenters = {
     hardware:  { x: W * 0.15, y: H * 0.25 },
-    base:      { x: W * 0.4,  y: H * 0.8 },
+    base:      { x: W * 0.32, y: H * 0.82 },
     framework: { x: W * 0.3,  y: H * 0.5 },
     hf:        { x: W * 0.6,  y: H * 0.45 },
-    serving:   { x: W * 0.82, y: H * 0.35 },
-    app:       { x: W * 0.85, y: H * 0.75 },
+    serving:   { x: W * 0.82, y: H * 0.3 },
+    app:       { x: W * 0.88, y: H * 0.72 },
   };
 
   // Radius scale
@@ -754,7 +869,7 @@ function buildGraph() {
     .force('charge', d3.forceManyBody().strength(-400))
     .force('x', d3.forceX(d => layerCenters[d.layer].x).strength(0.15))
     .force('y', d3.forceY(d => layerCenters[d.layer].y).strength(0.15))
-    .force('collide', d3.forceCollide(d => d.r + 8).strength(0.8))
+    .force('collide', d3.forceCollide(d => d.r + 12).strength(0.8))
     .on('tick', ticked);
 
   function ticked() {
@@ -901,11 +1016,11 @@ function showNodeDetail(d) {
   // Risk
   const riskEl = document.getElementById('detailRisk');
   const riskClass = d.risk >= 85 ? 'risk-critical' : d.risk >= 65 ? 'risk-high' : 'risk-medium';
-  const riskLabel = d.risk >= 85 ? 'CRITICAL' : d.risk >= 65 ? 'HIGH' : 'MEDIUM';
+  const riskLabel = d.risk >= 85 ? 'КРИТИЧЕСКИЙ' : d.risk >= 65 ? 'ВЫСОКИЙ' : 'СРЕДНИЙ';
   riskEl.innerHTML = `<span class="risk-badge ${riskClass}">${d.risk}/100 ${riskLabel}</span>`;
 
-  document.getElementById('detailDownloads').textContent = d.downloads > 0 ? formatNumber(d.downloads) : 'N/A (hardware)';
-  document.getElementById('detailDeps').textContent = d.depRepos > 0 ? formatNumber(d.depRepos) + '+' : 'N/A';
+  document.getElementById('detailDownloads').textContent = d.downloads > 0 ? formatNumber(d.downloads) : 'Н/Д (аппаратный)';
+  document.getElementById('detailDeps').textContent = d.depRepos > 0 ? formatNumber(d.depRepos) + '+' : 'Н/Д';
   document.getElementById('detailMaintainers').textContent = d.maintainers;
   document.getElementById('detailBlast').textContent = d.blast;
 
@@ -974,7 +1089,7 @@ function resetSimulation() {
   btn.classList.remove('active');
   btn.innerHTML = '&#x26A0; Симуляция компрометации';
   resetBtn.style.display = 'none';
-  hint.textContent = 'scroll: zoom · drag: pan · click: детали';
+  hint.textContent = 'колёсико: масштаб · перетаскивание: навигация · клик: детали';
   hint.style.color = '#334';
 
   // Clear all compromise visuals
@@ -1053,13 +1168,13 @@ function buildTimeline() {
   const track = document.getElementById('timelineTrack');
   const trackWidth = track.clientWidth || (window.innerWidth - 48);
 
-  // Date range: 2022-10 to 2025-06
+  // Date range: 2022-10 to 2026-06
   const startDate = new Date(2022, 9);  // Oct 2022
-  const endDate = new Date(2025, 7);    // Aug 2025
+  const endDate = new Date(2026, 5);    // Jun 2026
   const totalMs = endDate - startDate;
 
   // Year labels
-  [2023, 2024, 2025].forEach(year => {
+  [2023, 2024, 2025, 2026].forEach(year => {
     const yearDate = new Date(year, 0);
     const pos = ((yearDate - startDate) / totalMs) * trackWidth;
     const label = document.createElement('div');
@@ -1069,18 +1184,45 @@ function buildTimeline() {
     track.appendChild(label);
   });
 
-  INCIDENTS.forEach(inc => {
+  // Sort incidents by date for zigzag ordering
+  const sorted = [...INCIDENTS].sort((a, b) => {
+    const da = a.date.split('-'), db = b.date.split('-');
+    return new Date(+da[0], +da[1] - 1) - new Date(+db[0], +db[1] - 1);
+  });
+
+  // Track positions to detect overlap and apply offset
+  const usedPositions = [];
+
+  sorted.forEach((inc, i) => {
     const parts = inc.date.split('-');
     const incDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1);
-    const pos = ((incDate - startDate) / totalMs) * trackWidth;
+    let pos = ((incDate - startDate) / totalMs) * trackWidth;
+
+    // If another incident occupies the same (or very close) position, shift right
+    for (const used of usedPositions) {
+      if (Math.abs(pos - used) < 70) {
+        pos = used + 70;
+      }
+    }
+    usedPositions.push(pos);
+
+    // Zigzag: alternate between bottom row and top row
+    const isUp = i % 2 === 1;
 
     const el = document.createElement('div');
-    el.className = 'timeline-incident';
+    el.className = 'timeline-incident' + (isUp ? ' stagger-up' : '');
     el.style.left = (pos - 6) + 'px';
-    el.style.bottom = '20px';
+    el.style.bottom = isUp ? '40px' : '4px';
     el.title = inc.desc;
+
+    // Connector line from dot to axis for stagger-up items
+    const connectorHTML = isUp
+      ? '<div class="timeline-connector" style="top: 12px; height: 28px;"></div>'
+      : '';
+
     el.innerHTML = `
       <div class="timeline-dot"></div>
+      ${connectorHTML}
       <div class="timeline-label">${inc.label}</div>
       <div class="timeline-date">${inc.date}</div>
     `;
