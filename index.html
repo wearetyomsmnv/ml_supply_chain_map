@@ -144,6 +144,16 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 .attack-date { font-family: 'JetBrains Mono', monospace; color: #ff1744; font-size: 10px; }
+.threat-item {
+  background: #111820; border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 6px; padding: 8px 10px; margin-bottom: 6px;
+}
+.threat-actor-badge {
+  display: inline-block; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 2px 8px; border-radius: 3px;
+  font-weight: 600;
+}
+.threat-vector { font-size: 11px; color: #889; margin-top: 4px; }
 .maintainers-info {
   font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #ff9100;
 }
@@ -573,6 +583,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
       <div id="detailCVEs"></div>
       <div class="detail-section-title" id="attackSectionTitle" style="display:none">Attacks / Incidents</div>
       <div id="detailAttacks"></div>
+      <div class="detail-section-title" id="threatSectionTitle" style="display:none">Threat Actors</div>
+      <div id="detailThreats"></div>
     </div>
 
     <!-- Compromise simulation results -->
@@ -625,43 +637,85 @@ const LAYERS = {
   app:       { name: 'Applications',          color: '#d500f9', order: 5 },
 };
 
+const THREAT_ACTORS = {
+  'nation-state': { label: 'Nation-State APT',     icon: '\u{1f3db}',  color: '#ff1744' },
+  'crime':        { label: 'Organized Crime',      icon: '\u{1f4b0}',  color: '#ff9100' },
+  'insider':      { label: 'Rogue Maintainer',     icon: '\u{1f47e}',  color: '#ffea00' },
+  'supply-chain': { label: 'Supply Chain',         icon: '\u{1f4e6}',  color: '#d500f9' },
+  'opportunist':  { label: 'Opportunistic / PoC',  icon: '\u{1f529}',  color: '#76ff03' },
+};
+
 const NODES = [
   // Hardware
   { id: 'cuda',         label: 'NVIDIA CUDA',     layer: 'hardware',  downloads: 0,      risk: 95, depRepos: 0,     maintainers: 'NVIDIA Corp',
     blast: 'Compromising CUDA affects ~90% of all GPU inference. PyTorch ships 13 CUDA libraries as direct dependencies. ChatGPT, Tesla Autopilot, all production transformer systems run on CUDA.',
     cves: [{ id: 'CVE-2023-4969', cvss: 6.5, desc: 'LeftoverLocals — GPU memory leak between processes (Apple/AMD/Qualcomm)' }],
-    attacks: [], shape: 'hex' },
+    attacks: [],
+    threats: [
+      { actor: 'nation-state', vector: 'Hardware-level backdoors or export controls on GPU compute; compromise affects 90% of GPU inference' },
+      { actor: 'supply-chain', vector: 'Trojanized CUDA toolkit or driver update distributed via official channels' }
+    ], shape: 'hex' },
   { id: 'tsmc',         label: 'TSMC',             layer: 'hardware',  downloads: 0,      risk: 90, depRepos: 0,     maintainers: 'TSMC',
     blast: 'TSMC manufactures ~90% of advanced chips, including all NVIDIA GPUs. Taiwan Strait geopolitical risks pose an existential threat to the entire AI chip supply chain.',
-    cves: [], attacks: [], shape: 'hex' },
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'nation-state', vector: 'Geopolitical disruption (Taiwan Strait), export sanctions, or fab sabotage' },
+      { actor: 'insider', vector: 'IP theft of chip fabrication processes' }
+    ], shape: 'hex' },
   { id: 'asml',         label: 'ASML',             layer: 'hardware',  downloads: 0,      risk: 85, depRepos: 0,     maintainers: 'ASML',
     blast: '100% monopoly on EUV lithography. Machines costing \u20AC200M \u2014 literally no alternative supplier for advanced chip manufacturing.',
-    cves: [], attacks: [], shape: 'hex' },
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'nation-state', vector: 'Targeting EUV monopoly via export controls or industrial espionage' }
+    ], shape: 'hex' },
   // Base libraries
-  { id: 'numpy',        label: 'numpy',            layer: 'base',      downloads: 500000000,  risk: 88, depRepos: 59200, maintainers: '~15 core',
+  { id: 'numpy',        label: 'numpy',            layer: 'base',      downloads: 683000000,  risk: 88, depRepos: 59200, maintainers: '~15 core',
     blast: 'Cornerstone of the ML ecosystem. 59,200+ dependent repos \u2014 largest blast radius of any package. numpy 2.0 API-breaking changes caused cascading failures across the ecosystem.',
     cves: [],
     attacks: [
       { date: '2023', desc: 'numpy 2.0 breaking changes \u2014 cascade of dependent package failures' },
       { date: '2025', desc: 'np.load(allow_pickle=True): .npy/.npz files with pickle objects \u2014 RCE when loading untrusted arrays. Default changed in 1.16.3, but thousands of projects still use True' }
+    ],
+    threats: [
+      { actor: 'insider', vector: 'Rogue maintainer \u2014 subtle backdoor in core numerical routines (only ~15 core devs)' },
+      { actor: 'supply-chain', vector: 'Dependency confusion or typosquatting on PyPI targeting 59K+ dependent repos' }
     ], shape: 'circle' },
-  { id: 'scipy',        label: 'scipy',            layer: 'base',      downloads: 284000000,  risk: 55, depRepos: 12000, maintainers: '~10 core',
-    blast: '284M downloads/mo. Used for scientific computing, optimization, and statistics in ML pipelines.',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'pandas',       label: 'pandas',           layer: 'base',      downloads: 437000000,  risk: 55, depRepos: 25000, maintainers: '~15 core',
-    blast: '437M downloads/mo. Data processing layer for most ML systems.',
+  { id: 'scipy',        label: 'scipy',            layer: 'base',      downloads: 257000000,  risk: 55, depRepos: 12000, maintainers: '~10 core',
+    blast: '257M downloads/mo. Used for scientific computing, optimization, and statistics in ML pipelines.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'PyPI package substitution targeting scientific computing users' },
+      { actor: 'opportunist', vector: 'Exploiting known deserialization or C-extension vulnerabilities' }
+    ], shape: 'circle' },
+  { id: 'pandas',       label: 'pandas',           layer: 'base',      downloads: 489000000,  risk: 55, depRepos: 25000, maintainers: '~15 core',
+    blast: '489M downloads/mo. Data processing layer for most ML systems.',
     cves: [],
-    attacks: [{ date: '2025', desc: 'pd.read_pickle() \u2014 DataFrame deserialization via pickle, RCE when loading untrusted data' }], shape: 'circle' },
+    attacks: [{ date: '2025', desc: 'pd.read_pickle() \u2014 DataFrame deserialization via pickle, RCE when loading untrusted data' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious release targeting 489M monthly downloads' },
+      { actor: 'opportunist', vector: 'RCE via pd.read_pickle() on untrusted DataFrames' }
+    ], shape: 'circle' },
   { id: 'scikit-learn', label: 'scikit-learn',     layer: 'base',      downloads: 159000000,  risk: 62, depRepos: 18000, maintainers: '~20 core',
     blast: '159M downloads/mo. Classical ML \u2014 classification, regression, clustering. Depends on numpy and scipy.',
     cves: [],
-    attacks: [{ date: '2025', desc: 'Pickle deserialization via joblib.load \u2014 scikit-learn models stored as pickle, RCE via __reduce__' }], shape: 'circle' },
-  { id: 'pillow',       label: 'Pillow',           layer: 'base',      downloads: 120000000,  risk: 45, depRepos: 15000, maintainers: '~5 core',
-    blast: '120M downloads/mo. Image processing, critical for all CV pipelines.',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'matplotlib',   label: 'matplotlib',       layer: 'base',      downloads: 200000000,  risk: 40, depRepos: 20000, maintainers: '~15 core',
-    blast: '200M downloads/mo. Data visualization, depends on numpy. Used throughout the ML ecosystem.',
-    cves: [], attacks: [], shape: 'circle' },
+    attacks: [{ date: '2025', desc: 'Pickle deserialization via joblib.load \u2014 scikit-learn models stored as pickle, RCE via __reduce__' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'PyPI substitution for widely-used ML library' },
+      { actor: 'opportunist', vector: 'Pickle RCE via joblib.load() on untrusted model files' }
+    ], shape: 'circle' },
+  { id: 'pillow',       label: 'Pillow',           layer: 'base',      downloads: 253000000,  risk: 45, depRepos: 15000, maintainers: '~5 core',
+    blast: '253M downloads/mo. Image processing, critical for all CV pipelines.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Compromised release affecting all CV pipelines' },
+      { actor: 'opportunist', vector: 'Heap overflow via crafted image files (historical CVE pattern)' }
+    ], shape: 'circle' },
+  { id: 'matplotlib',   label: 'matplotlib',       layer: 'base',      downloads: 129000000,  risk: 40, depRepos: 20000, maintainers: '~15 core',
+    blast: '129M downloads/mo. Data visualization, depends on numpy. Used throughout the ML ecosystem.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Dependency confusion on PyPI \u2014 large download surface' }
+    ], shape: 'circle' },
   // ML Frameworks
   { id: 'pytorch',      label: 'PyTorch',          layer: 'framework', downloads: 70800000,   risk: 92, depRepos: 30000, maintainers: '7 core',
     blast: '70.8M downloads/mo. Only 7 core maintainers \u2014 critical concentration. Ships 13 NVIDIA CUDA libraries. Primary framework for LLM training and inference.',
@@ -670,6 +724,12 @@ const NODES = [
       { date: '2022-12', desc: 'torchtriton dependency confusion \u2014 SSH key exfiltration via DNS tunneling' },
       { date: '2024-11', desc: 'Free Hugs Part 2: TF exploit persistence \u2014 exploit from TF 2.15 works in TF 2.18, pickle protocol 4 bypasses scanners' },
       { date: '2025', desc: 'TorchScript (.pt): torch.jit.load executes arbitrary code without sandbox \u2014 RCE via compiled models. Format .pt/.pth = pickle + ZIP' }
+    ],
+    threats: [
+      { actor: 'nation-state', vector: 'Only 7 core maintainers \u2014 single highest-leverage target in ML' },
+      { actor: 'insider', vector: 'Rogue maintainer backdoor in training/inference core' },
+      { actor: 'supply-chain', vector: 'Dependency confusion (torchtriton 2022 incident proved this works)' },
+      { actor: 'crime', vector: 'Cryptomining via torch.load() RCE on GPU servers' }
     ], shape: 'circle' },
   { id: 'tensorflow',   label: 'TensorFlow',       layer: 'framework', downloads: 21200000,   risk: 70, depRepos: 15000, maintainers: 'Google team',
     blast: '21.2M downloads/mo. Widely used in production systems and mobile devices (TFLite).',
@@ -677,49 +737,94 @@ const NODES = [
     attacks: [
       { date: '2024-11', desc: 'Free Hugs Part 2: Lambda Layer exploit \u2014 marshal deserialization in legacy h5 models, persistence across TF versions' },
       { date: '2025', desc: 'SavedModel arbitrary ops: tf.py_function in SavedModel executes arbitrary Python on tf.saved_model.load. Protobuf format without ops validation' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Compromised release via build pipeline targeting production/mobile (TFLite)' },
+      { actor: 'opportunist', vector: 'Exploiting legacy SavedModel/h5 deserialization (Free Hugs research)' }
     ], shape: 'circle' },
-  { id: 'keras',         label: 'Keras',            layer: 'framework', downloads: 30000000,   risk: 60, depRepos: 10000, maintainers: 'Google/community',
-    blast: '30M downloads/mo. High-level API for TensorFlow and PyTorch. Widely used for prototyping and model training.',
+  { id: 'keras',         label: 'Keras',            layer: 'framework', downloads: 17000000,   risk: 60, depRepos: 10000, maintainers: 'Google/community',
+    blast: '17M downloads/mo. High-level API for TensorFlow and PyTorch. Widely used for prototyping and model training.',
     cves: [],
-    attacks: [{ date: '2024-12', desc: 'Free Hugs Part 3: from_pretrained_keras loads legacy h5 with Lambda layers \u2014 marshal RCE' }], shape: 'circle' },
+    attacks: [{ date: '2024-12', desc: 'Free Hugs Part 3: from_pretrained_keras loads legacy h5 with Lambda layers \u2014 marshal RCE' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'Trojanized package targeting prototyping workflows' },
+      { actor: 'opportunist', vector: 'Lambda layer marshal deserialization in legacy h5 models (Free Hugs Part 3)' }
+    ], shape: 'circle' },
   // HuggingFace ecosystem
   { id: 'transformers', label: 'transformers',     layer: 'hf',        downloads: 104500000,  risk: 90, depRepos: 28575, maintainers: 'HF team (~20)',
     blast: '104.5M downloads/mo. Core HF ecosystem package \u2014 all models pass through it. 28,575 GitHub repos reuse pretrained models.',
     cves: [{ id: 'CVE-2024-3568', cvss: 7.4, desc: 'Path traversal in Hugging Face Hub \u2014 file extraction beyond target directory' }],
-    attacks: [{ date: '2024-11', desc: 'Checkmarx Free Hugs: trust_remote_code obfuscation \u2014 masking True via dict/str/expression in README' }], shape: 'circle' },
-  { id: 'hf-hub',       label: 'huggingface-hub',  layer: 'hf',        downloads: 113500000,  risk: 92, depRepos: 20000, maintainers: 'HF team (~10)',
-    blast: '113.5M downloads/mo. Compromise would affect EVERY HF cluster package simultaneously. 45.4B cumulative model downloads pass through it.',
+    attacks: [{ date: '2024-11', desc: 'Checkmarx Free Hugs: trust_remote_code obfuscation \u2014 masking True via dict/str/expression in README' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious auto_map config or trust_remote_code obfuscation in model repos' },
+      { actor: 'crime', vector: 'Data exfiltration via backdoored pretrained models (28K+ dependent repos)' }
+    ], shape: 'circle' },
+  { id: 'hf-hub',       label: 'huggingface-hub',  layer: 'hf',        downloads: 163000000,  risk: 92, depRepos: 20000, maintainers: 'HF team (~10)',
+    blast: '163M downloads/mo. Compromise would affect EVERY HF cluster package simultaneously. 45.4B cumulative model downloads pass through it.',
     cves: [{ id: 'CVE-2024-3568', cvss: 7.4, desc: 'Path traversal \u2014 file extraction beyond target directory during model download' }],
     attacks: [
       { date: '2024-02', desc: 'Namespace hijacking (AIJacking) \u2014 takeover of deleted accounts, reverse shell via models with 100K+ downloads' },
       { date: '2024-12', desc: 'Free Hugs Part 1: malicious auto_map in config.json \u2014 arbitrary Python import during model loading' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Namespace hijacking of deleted accounts to serve malicious models' },
+      { actor: 'crime', vector: 'Mass distribution of trojanized models via the hub (45.4B cumulative downloads)' },
+      { actor: 'insider', vector: 'Rogue employee \u2014 hub compromise would affect every HF package simultaneously' }
     ], shape: 'circle' },
-  { id: 'tokenizers',   label: 'tokenizers',       layer: 'hf',        downloads: 78000000,   risk: 60, depRepos: 5000,  maintainers: 'HF team (~5)',
-    blast: '78M downloads/mo. Rust tokenization implementation. Critical for all NLP models.',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'safetensors',  label: 'safetensors',      layer: 'hf',        downloads: 47900000,   risk: 72, depRepos: 8000,  maintainers: 'HF team (~3)',
-    blast: '47.9M downloads/mo. Positioned as a safe pickle replacement. Core \u2014 ~400 lines of Rust. Despite this, 44.9% of models still use pickle.',
+  { id: 'tokenizers',   label: 'tokenizers',       layer: 'hf',        downloads: 98000000,   risk: 60, depRepos: 5000,  maintainers: 'HF team (~5)',
+    blast: '98M downloads/mo. Rust tokenization implementation. Critical for all NLP models.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'insider', vector: 'Rogue maintainer \u2014 only ~5 core devs for Rust tokenizer used by all NLP models' },
+      { actor: 'supply-chain', vector: 'Compromised crate/wheel targeting tokenizer pipeline' }
+    ], shape: 'circle' },
+  { id: 'safetensors',  label: 'safetensors',      layer: 'hf',        downloads: 56000000,   risk: 72, depRepos: 8000,  maintainers: 'HF team (~3)',
+    blast: '56M downloads/mo. Positioned as a safe pickle replacement. Core \u2014 ~400 lines of Rust. Despite this, 44.9% of models still use pickle.',
     cves: [],
     attacks: [
       { date: '2024-02', desc: 'Safetensors conversion service hijack \u2014 converter bot used to poison models' },
       { date: '2024-12', desc: 'Free Hugs Part 4: PickleScan bypass via bdb.Bdb.run, pickle protocol 4, recursive torch.load' },
       { date: '2025', desc: 'Safetensors header bomb: JSON header up to 100MB \u2192 DoS during parsing. Metadata injection via arbitrary header keys' }
+    ],
+    threats: [
+      { actor: 'insider', vector: 'Only ~3 maintainers for the "safe" format \u2014 extreme concentration risk' },
+      { actor: 'supply-chain', vector: 'Conversion service hijack to poison models during pickle\u2192safetensors migration' }
     ], shape: 'circle' },
   { id: 'datasets',     label: 'datasets',         layer: 'hf',        downloads: 46000000,   risk: 65, depRepos: 4000,  maintainers: 'HF team (~8)',
     blast: '46M downloads/mo. 500K+ datasets loaded through it. 9 malicious data loading scripts found.',
-    cves: [], attacks: [{ date: '2024', desc: '9 malicious dataset loading scripts discovered by MalHug' }], shape: 'circle' },
+    cves: [], attacks: [{ date: '2024', desc: '9 malicious dataset loading scripts discovered by MalHug' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious data loading scripts (9 already found by MalHug)' },
+      { actor: 'crime', vector: 'Training data poisoning via compromised datasets' }
+    ], shape: 'circle' },
   { id: 'accelerate',   label: 'accelerate',       layer: 'hf',        downloads: 20600000,   risk: 55, depRepos: 3000,  maintainers: 'HF team (~5)',
     blast: '20.6M downloads/mo. Distributed training \u2014 compromise could affect all training pipelines.',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Trojanized release targeting distributed training pipelines' },
+      { actor: 'insider', vector: 'Backdoor in multi-GPU coordination code' }
+    ], shape: 'circle' },
   { id: 'diffusers',    label: 'diffusers',        layer: 'hf',        downloads: 9800000,    risk: 55, depRepos: 2000,  maintainers: 'HF team (~8)',
     blast: '9.8M downloads/mo. Framework for diffusion models (Stable Diffusion, etc.).',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious diffusion model checkpoints on HuggingFace Hub' },
+      { actor: 'crime', vector: 'Trojanized image generation models for CSAM or deepfakes' }
+    ], shape: 'circle' },
   { id: 'peft',         label: 'peft',             layer: 'hf',        downloads: 7900000,    risk: 50, depRepos: 1500,  maintainers: 'HF team (~5)',
     blast: '7.9M downloads/mo. Parameter-efficient fine-tuning \u2014 LoRA and other adapters.',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'trl',          label: 'trl',              layer: 'hf',        downloads: 5000000,    risk: 50, depRepos: 800,   maintainers: 'HF team (~5)',
-    blast: '5M downloads/mo. RLHF model training. Part of HF cluster, depends on transformers, pytorch, peft, accelerate, datasets.',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Poisoned LoRA adapters uploaded to model hubs' },
+      { actor: 'crime', vector: 'Backdoored fine-tuning adapters that activate on specific inputs' }
+    ], shape: 'circle' },
+  { id: 'trl',          label: 'trl',              layer: 'hf',        downloads: 2500000,    risk: 50, depRepos: 800,   maintainers: 'HF team (~5)',
+    blast: '2.5M downloads/mo. RLHF model training. Part of HF cluster, depends on transformers, pytorch, peft, accelerate, datasets.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Compromised RLHF training pipeline to manipulate model alignment' },
+      { actor: 'insider', vector: 'Subtle reward model manipulation during RLHF training' }
+    ], shape: 'circle' },
   // Serving
   { id: 'vllm',         label: 'vLLM',             layer: 'serving',   downloads: 6500000,    risk: 92, depRepos: 2000,  maintainers: '~15 core',
     blast: '5-8M downloads/mo. Production LLM serving standard. 60+ direct dependencies \u2192 ~150+ unique packages after transitive resolution.',
@@ -731,6 +836,11 @@ const NODES = [
     ],
     attacks: [
       { date: '2025-04', desc: 'CVE-2025-32444 CVSS 10.0 \u2014 pickle RCE via Mooncake ZeroMQ, unauthorized access' }
+    ],
+    threats: [
+      { actor: 'crime', vector: 'Cryptomining on GPU inference servers via RCE (CVE-2025-32444 CVSS 10.0)' },
+      { actor: 'opportunist', vector: 'Exploiting public PoCs for Mooncake pickle RCE or video processing heap overflow' },
+      { actor: 'supply-chain', vector: 'Malicious dependency in 60+ direct deps (~150 transitive)' }
     ], shape: 'circle' },
   { id: 'onnx',         label: 'ONNX Runtime',     layer: 'serving',   downloads: 22900000,   risk: 68, depRepos: 5000,  maintainers: 'Microsoft',
     blast: '22.9M downloads/mo. Cross-platform inference \u2014 used by Azure, Windows ML, and many edge devices.',
@@ -738,11 +848,19 @@ const NODES = [
     attacks: [
       { date: '2025', desc: 'Path traversal during ONNX model extraction + arbitrary custom operator execution' },
       { date: '2025', desc: 'ONNX Protobuf format: custom ops loading from shared libraries (.so/.dll) \u2014 arbitrary native code execution' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious custom operators (.so/.dll) loaded during ONNX model inference' },
+      { actor: 'opportunist', vector: 'Path traversal via external_data during model loading (CVE-2024-27318)' }
     ], shape: 'circle' },
   { id: 'triton',       label: 'Triton',           layer: 'serving',   downloads: 35700000,   risk: 75, depRepos: 3000,  maintainers: 'OpenAI/NVIDIA',
     blast: '35.7M downloads/mo. GPU compiler, PyTorch auto-dependency. torchtriton was the target of the 2022 dependency confusion attack.',
     cves: [],
-    attacks: [{ date: '2022-12', desc: 'torchtriton dependency confusion \u2014 2,717 malicious package downloads in 24 hours' }], shape: 'circle' },
+    attacks: [{ date: '2022-12', desc: 'torchtriton dependency confusion \u2014 2,717 malicious package downloads in 24 hours' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'Dependency confusion \u2014 torchtriton attack (2022) proved this vector works' },
+      { actor: 'nation-state', vector: 'GPU compiler backdoor affecting all PyTorch JIT compilation' }
+    ], shape: 'circle' },
   // Applications
   { id: 'langchain',    label: 'LangChain',        layer: 'app',       downloads: 187000000,  risk: 75, depRepos: 8000,  maintainers: 'LangChain Inc',
     blast: '187M downloads/mo. LLM application framework \u2014 connects all ecosystem layers in production systems.',
@@ -754,6 +872,11 @@ const NODES = [
     attacks: [
       { date: '2025-12', desc: 'LangGrinch CVE-2025-68664 \u2014 API key leakage and RCE via serialization injection' },
       { date: '2025', desc: 'Prompt injection \u2192 Agent RCE: SQL injection via LangChain SQL Agent, data leakage via tool calling' }
+    ],
+    threats: [
+      { actor: 'crime', vector: 'API key and secret extraction via serialization injection (LangGrinch)' },
+      { actor: 'opportunist', vector: 'Prompt injection \u2192 SQL injection \u2192 RCE via LangChain SQL Agent' },
+      { actor: 'supply-chain', vector: 'Malicious tool/chain in the fast-growing LangChain ecosystem' }
     ], shape: 'circle' },
   // New nodes from AI-Infra-Guard v3.6.2
   { id: 'ollama',       label: 'Ollama',           layer: 'serving',   downloads: 5000000,    risk: 85, depRepos: 3000,  maintainers: 'Ollama Inc (~10)',
@@ -761,48 +884,88 @@ const NODES = [
     cves: [
       { id: 'CVE-2025-63389', cvss: 8.5, desc: 'Missing API authentication \u2014 unauthorized model operations' }
     ],
-    attacks: [{ date: '2025', desc: 'GGUF/GGML parsing: OOB write, heap overflow when loading crafted models' }], shape: 'circle' },
+    attacks: [{ date: '2025', desc: 'GGUF/GGML parsing: OOB write, heap overflow when loading crafted models' }],
+    threats: [
+      { actor: 'crime', vector: 'Cryptomining on 175K publicly exposed servers with no authentication' },
+      { actor: 'opportunist', vector: 'OOB-write RCE via crafted GGUF model files' }
+    ], shape: 'circle' },
   { id: 'mlflow',       label: 'MLflow',           layer: 'serving',   downloads: 20000000,   risk: 78, depRepos: 5000,  maintainers: 'LF AI (~20)',
     blast: '20M downloads/mo. ML lifecycle, model registry. Directory traversal \u2192 RCE (CVE-2025-11201).',
     cves: [
       { id: 'CVE-2025-11201', cvss: 8.8, desc: 'Directory traversal in Tracking Server \u2192 remote code execution' }
-    ], attacks: [], shape: 'circle' },
+    ], attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Directory traversal \u2192 RCE on model registry servers (CVE-2025-11201)' },
+      { actor: 'crime', vector: 'Model registry poisoning to distribute backdoored production models' }
+    ], shape: 'circle' },
   { id: 'jupyter',      label: 'Jupyter',          layer: 'base',      downloads: 30000000,   risk: 65, depRepos: 40000, maintainers: 'Jupyter team (~30)',
     blast: '30M downloads/mo. Primary ML IDE. DOM clobbering via malicious notebooks (CVE-2024-43805).',
     cves: [
       { id: 'CVE-2024-43805', cvss: 7.6, desc: 'DOM Clobbering via malicious Markdown cells in notebooks' }
-    ], attacks: [], shape: 'circle' },
+    ], attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'DOM Clobbering via malicious shared notebooks (CVE-2024-43805)' },
+      { actor: 'crime', vector: 'Social engineering via trojanized .ipynb notebooks with hidden code cells' }
+    ], shape: 'circle' },
   { id: 'dask',         label: 'Dask',             layer: 'base',      downloads: 30000000,   risk: 70, depRepos: 8000,  maintainers: 'Dask team (~15)',
     blast: '30M downloads/mo. Distributed computing. Pickle deserialization \u2192 RCE (CVE-2024-10096).',
     cves: [
       { id: 'CVE-2024-10096', cvss: 8.0, desc: 'Pickle deserialization in distributed server \u2192 remote command execution' }
-    ], attacks: [], shape: 'circle' },
+    ], attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Pickle RCE on exposed distributed workers (CVE-2024-10096)' },
+      { actor: 'crime', vector: 'Hijacking distributed compute clusters for cryptomining' }
+    ], shape: 'circle' },
   { id: 'langflow',     label: 'Langflow',         layer: 'app',       downloads: 2000000,    risk: 82, depRepos: 1500,  maintainers: 'DataStax (~15)',
     blast: '2M downloads/mo. 9 CVEs including multiple RCE and code injection. Visual LLM application builder.',
     cves: [
       { id: 'CVE-2025-3248', cvss: 9.8, desc: 'Unauthenticated RCE via /api/v1/validate/code \u2014 arbitrary Python code execution' }
-    ], attacks: [], shape: 'circle' },
+    ], attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Unauthenticated RCE via /api/v1/validate/code (CVE-2025-3248 CVSS 9.8)' },
+      { actor: 'crime', vector: 'Data theft from visual LLM workflows processing sensitive documents' }
+    ], shape: 'circle' },
   { id: 'dify',         label: 'Dify',             layer: 'app',       downloads: 3000000,    risk: 80, depRepos: 2000,  maintainers: 'Dify Inc (~20)',
     blast: '3M downloads/mo. Sandbox escape with root privileges (CVE-2025-3466, CVSS 9.8). LLM platform.',
     cves: [
       { id: 'CVE-2025-3466', cvss: 9.8, desc: 'Sandbox escape \u2014 code execution with root privileges via code node' }
-    ], attacks: [], shape: 'circle' },
+    ], attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Sandbox escape with root privileges (CVE-2025-3466 CVSS 9.8)' },
+      { actor: 'crime', vector: 'Exfiltrating data from self-hosted LLM platform instances' }
+    ], shape: 'circle' },
   // New nodes from XLSX/DOCX enrichment
   { id: 'gradio',        label: 'Gradio',           layer: 'app',       downloads: 15000000,   risk: 72, depRepos: 5000,  maintainers: 'HF team (~10)',
     blast: '15M downloads/mo. ML demos and interfaces. Arbitrary file read, SSRF, path traversal history. Primary tool for model demo interfaces.',
     cves: [{ id: 'CVE-2024-47084', cvss: 8.3, desc: 'SSRF via URL upload \u2014 access to internal services and metadata' }],
-    attacks: [], shape: 'circle' },
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Arbitrary file read and SSRF via URL upload (CVE-2024-47084)' },
+      { actor: 'supply-chain', vector: 'Trojanized Gradio spaces serving malicious model demos' }
+    ], shape: 'circle' },
   { id: 'ray',           label: 'Ray',              layer: 'serving',   downloads: 8000000,    risk: 78, depRepos: 4000,  maintainers: 'Anyscale (~20)',
     blast: '8M downloads/mo. Distributed ML framework. Unauthenticated dashboard \u2192 RCE. Pickle in Ray workers.',
     cves: [{ id: 'CVE-2023-48022', cvss: 9.8, desc: 'Unauthenticated Ray Dashboard \u2014 RCE via Job Submission API (ShadowRay)' }],
-    attacks: [{ date: '2024', desc: 'Ray ObjectStore: pickle serialization of objects between workers \u2014 RCE upon compromising a single cluster node. No trust boundaries' }], shape: 'circle' },
+    attacks: [{ date: '2024', desc: 'Ray ObjectStore: pickle serialization of objects between workers \u2014 RCE upon compromising a single cluster node. No trust boundaries' }],
+    threats: [
+      { actor: 'crime', vector: 'Cryptomining via ShadowRay \u2014 unauthenticated dashboard RCE on compute clusters' },
+      { actor: 'opportunist', vector: 'Pickle RCE between Ray workers with no trust boundaries' }
+    ], shape: 'circle' },
   { id: 'wandb',         label: 'W&B',              layer: 'serving',   downloads: 5000000,    risk: 60, depRepos: 3000,  maintainers: 'Weights & Biases (~15)',
     blast: '5M downloads/mo. Experiment tracking. Artifact deserialization, API key leakage via logs.',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'crime', vector: 'API key harvesting from leaked experiment logs' },
+      { actor: 'supply-chain', vector: 'Trojanized artifact downloads from experiment tracking' }
+    ], shape: 'circle' },
   { id: 'llamaindex',    label: 'LlamaIndex',       layer: 'app',       downloads: 8000000,    risk: 70, depRepos: 2000,  maintainers: 'LlamaIndex Inc (~15)',
     blast: '8M downloads/mo. RAG framework. Prompt injection \u2192 data exfiltration via retrieval-augmented generation.',
     cves: [{ id: 'CVE-2024-45202', cvss: 7.5, desc: 'Prompt injection via poisoned documents in RAG pipeline' }],
-    attacks: [], shape: 'circle' },
+    attacks: [],
+    threats: [
+      { actor: 'crime', vector: 'Data exfiltration from RAG pipelines processing confidential documents' },
+      { actor: 'opportunist', vector: 'Prompt injection via poisoned documents in retrieval pipeline' }
+    ], shape: 'circle' },
   // Serialization format core
   { id: 'llama-cpp',     label: 'llama.cpp',        layer: 'serving',   downloads: 4000000,    risk: 80, depRepos: 6000,  maintainers: 'ggerganov + community (~30)',
     blast: '4M downloads/mo. Core GGUF/GGML parser \u2014 backbone of Ollama, LM Studio, GPT4All. Multiple heap overflow and OOB-write in tensor parsing. Compromise would affect all local LLM inference.',
@@ -811,7 +974,11 @@ const NODES = [
       { id: 'CVE-2024-25294', cvss: 8.8, desc: 'GGUF parser: multiple heap buffer overflows during tensor processing' },
       { id: 'CVE-2024-23605', cvss: 8.2, desc: 'Heap buffer overflow in gguf_fread_str \u2014 RCE via crafted model' }
     ],
-    attacks: [{ date: '2024-08', desc: 'GGUF header manipulation: OOB write via crafted tensor sizes, alignment check bypass' }], shape: 'circle' },
+    attacks: [{ date: '2024-08', desc: 'GGUF header manipulation: OOB write via crafted tensor sizes, alignment check bypass' }],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious GGUF model files with crafted headers \u2014 affects Ollama, LM Studio, GPT4All' },
+      { actor: 'opportunist', vector: 'Heap buffer overflow via crafted tensor data (multiple CVEs)' }
+    ], shape: 'circle' },
   // Agentic frameworks
   { id: 'crewai',        label: 'CrewAI',           layer: 'app',       downloads: 1000000,    risk: 75, depRepos: 2000,  maintainers: 'CrewAI Inc (~15)',
     blast: '1M downloads/mo. Multi-agent orchestration framework. 60% Fortune 500 claim. Internal GitHub token leak (Dec 2025) exposed all private repos. COLM 2025 research: orchestrator hijacking to download and execute malicious binaries, even bypassing sub-agent refusals.',
@@ -819,6 +986,10 @@ const NODES = [
     attacks: [
       { date: '2025-12', desc: 'Uncrew token leak: high-privilege internal GitHub token exposed via improper exception handling, granting full access to all private repos' },
       { date: '2025', desc: 'COLM 2025: control-flow hijacking of CrewAI orchestrators \u2014 sub-agents bypassed, reverse shell executed despite safety refusals' }
+    ],
+    threats: [
+      { actor: 'crime', vector: 'Orchestrator hijacking \u2014 reverse shell via multi-agent control-flow manipulation' },
+      { actor: 'supply-chain', vector: 'Exploiting leaked internal tokens (Dec 2025 incident) to poison private repos' }
     ], shape: 'circle' },
   { id: 'autogpt',       label: 'AutoGPT',          layer: 'app',       downloads: 500000,     risk: 82, depRepos: 3000,  maintainers: 'Significant Gravitas (~20)',
     blast: '166K+ GitHub stars, one of the most starred AI repos. Command denylist bypass (CVSS 9.8) via path normalization. API keys logged in plaintext. Autonomous code execution with minimal guardrails.',
@@ -826,7 +997,11 @@ const NODES = [
       { id: 'CVE-2024-6091', cvss: 9.8, desc: 'Shell command denylist bypass via path normalization (/bin/./whoami) \u2014 OS command injection' },
       { id: 'CVE-2026-22038', cvss: 8.1, desc: 'API keys and auth secrets logged in plaintext via logger.info() in Stagehand integration' }
     ],
-    attacks: [{ date: '2024', desc: 'Prompt injection hijacking: GPT-4 linked to AutoGPT for automated prompt injection via API requests, searches, and code execution' }], shape: 'circle' },
+    attacks: [{ date: '2024', desc: 'Prompt injection hijacking: GPT-4 linked to AutoGPT for automated prompt injection via API requests, searches, and code execution' }],
+    threats: [
+      { actor: 'opportunist', vector: 'Command denylist bypass via path normalization \u2192 OS command injection' },
+      { actor: 'crime', vector: 'Autonomous agents executing attacker-controlled code with minimal guardrails' }
+    ], shape: 'circle' },
   { id: 'n8n',           label: 'n8n',              layer: 'app',       downloads: 2000000,    risk: 88, depRepos: 1500,  maintainers: 'n8n GmbH (~30)',
     blast: '103K+ internet-facing instances. 4 CVSS 9.9-10.0 vulnerabilities in a single month. AI workflow automation platform. Compromise exposes all connected API credentials, OAuth tokens, and database connections.',
     cves: [
@@ -835,19 +1010,31 @@ const NODES = [
       { id: 'CVE-2025-68613', cvss: 9.9, desc: 'Authenticated RCE via expression injection in workflow definitions' },
       { id: 'CVE-2025-68668', cvss: 9.9, desc: 'N8scape: Pyodide sandbox bypass via _pyodide._base.eval_code() \u2014 arbitrary OS commands' }
     ],
-    attacks: [{ date: '2026-01', desc: 'Ni8mare: mass exploitation of 100K+ exposed n8n servers. Government advisories issued by Australia and Canada' }], shape: 'circle' },
+    attacks: [{ date: '2026-01', desc: 'Ni8mare: mass exploitation of 100K+ exposed n8n servers. Government advisories issued by Australia and Canada' }],
+    threats: [
+      { actor: 'opportunist', vector: '4 CVEs at CVSS 9.9-10.0 \u2014 unauth RCE, sandbox bypass, file upload chains' },
+      { actor: 'crime', vector: 'Credential harvesting from 100K+ exposed instances (all connected API keys, OAuth tokens, databases)' }
+    ], shape: 'circle' },
   { id: 'haystack',      label: 'Haystack',         layer: 'app',       downloads: 500000,     risk: 68, depRepos: 1500,  maintainers: 'deepset GmbH (~20)',
     blast: '18K GitHub stars. RAG and agent framework. Jinja2 SSTI in 7 components (PromptBuilder, ChatPromptBuilder, OutputAdapter, etc.) \u2014 arbitrary code execution via template injection.',
     cves: [
       { id: 'CVE-2024-41950', cvss: 7.5, desc: 'Server-Side Template Injection (SSTI) via Jinja2 in PromptBuilder and 6 other components \u2014 arbitrary code execution' }
     ],
-    attacks: [{ date: '2025', desc: 'Flatt Security case study: Jinja2 SSTI pattern exploitable when user input embedded into prompt templates without sanitization' }], shape: 'circle' },
+    attacks: [{ date: '2025', desc: 'Flatt Security case study: Jinja2 SSTI pattern exploitable when user input embedded into prompt templates without sanitization' }],
+    threats: [
+      { actor: 'opportunist', vector: 'Jinja2 SSTI in 7 components \u2192 arbitrary code execution' },
+      { actor: 'supply-chain', vector: 'Template injection via poisoned user input in RAG prompt templates' }
+    ], shape: 'circle' },
   { id: 'metagpt',       label: 'MetaGPT',          layer: 'app',       downloads: 200000,     risk: 76, depRepos: 1000,  maintainers: 'Foundation Agents (~15)',
     blast: '45K GitHub stars. Multi-agent software engineering framework. Critical deserialization RCE in deserialize_message (ZDI-26-026). Agents generate and execute code autonomously.',
     cves: [
       { id: 'CVE-2026-0763', cvss: 9.8, desc: 'Deserialization of untrusted data in deserialize_message \u2014 Remote Code Execution (ZDI-26-026)' }
     ],
-    attacks: [{ date: '2025', desc: 'Multi-agent code execution: 97% malicious code execution rate for GPT-4o orchestrators interacting with poisoned files (arXiv research)' }], shape: 'circle' },
+    attacks: [{ date: '2025', desc: 'Multi-agent code execution: 97% malicious code execution rate for GPT-4o orchestrators interacting with poisoned files (arXiv research)' }],
+    threats: [
+      { actor: 'opportunist', vector: 'Deserialization RCE in deserialize_message (CVE-2026-0763 CVSS 9.8)' },
+      { actor: 'crime', vector: 'Poisoned files triggering 97% malicious code execution rate in multi-agent workflows' }
+    ], shape: 'circle' },
 ];
 
 // Edges: source DEPENDS ON target (arrow from source → target)
@@ -1414,6 +1601,25 @@ function showNodeDetail(d) {
     });
   } else {
     attackSectionTitle.style.display = 'none';
+  }
+
+  // Threat Actors
+  const threatContainer = document.getElementById('detailThreats');
+  const threatSectionTitle = document.getElementById('threatSectionTitle');
+  threatContainer.innerHTML = '';
+  if (d.threats && d.threats.length > 0) {
+    threatSectionTitle.style.display = 'block';
+    d.threats.forEach(t => {
+      const actor = THREAT_ACTORS[t.actor];
+      if (!actor) return;
+      threatContainer.innerHTML += `
+        <div class="threat-item">
+          <span class="threat-actor-badge" style="background:${hexToRGBA(actor.color, 0.2)};color:${actor.color};border:1px solid ${hexToRGBA(actor.color, 0.3)}">${actor.icon} ${actor.label}</span>
+          <div class="threat-vector">${t.vector}</div>
+        </div>`;
+    });
+  } else {
+    threatSectionTitle.style.display = 'none';
   }
 }
 
