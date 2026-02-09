@@ -427,16 +427,22 @@ const NODES = [
   // Base libraries
   { id: 'numpy',        label: 'numpy',            layer: 'base',      downloads: 500000000,  risk: 88, depRepos: 59200, maintainers: '~15 core',
     blast: 'Краеугольный камень ML-экосистемы. 59,200+ зависимых репо — крупнейший радиус поражения среди всех пакетов. numpy 2.0 API-breaking changes вызвали каскадные поломки по всей экосистеме.',
-    cves: [], attacks: [{ date: '2023', desc: 'numpy 2.0 breaking changes — каскад поломок зависимых пакетов' }], shape: 'circle' },
+    cves: [],
+    attacks: [
+      { date: '2023', desc: 'numpy 2.0 breaking changes — каскад поломок зависимых пакетов' },
+      { date: '2025', desc: 'np.load(allow_pickle=True): .npy/.npz файлы с pickle-объектами — RCE при загрузке недоверенных массивов. Default изменён в 1.16.3, но тысячи проектов используют True' }
+    ], shape: 'circle' },
   { id: 'scipy',        label: 'scipy',            layer: 'base',      downloads: 284000000,  risk: 55, depRepos: 12000, maintainers: '~10 core',
     blast: '284M загрузок/мес. Используется для научных вычислений, оптимизации, статистики в ML-пайплайнах.',
     cves: [], attacks: [], shape: 'circle' },
-  { id: 'pandas',       label: 'pandas',           layer: 'base',      downloads: 437000000,  risk: 50, depRepos: 25000, maintainers: '~15 core',
+  { id: 'pandas',       label: 'pandas',           layer: 'base',      downloads: 437000000,  risk: 55, depRepos: 25000, maintainers: '~15 core',
     blast: '437M загрузок/мес. Слой обработки данных для большинства ML-систем.',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'scikit-learn', label: 'scikit-learn',     layer: 'base',      downloads: 159000000,  risk: 55, depRepos: 18000, maintainers: '~20 core',
+    cves: [],
+    attacks: [{ date: '2025', desc: 'pd.read_pickle() — десериализация DataFrames через pickle, RCE при загрузке недоверенных данных' }], shape: 'circle' },
+  { id: 'scikit-learn', label: 'scikit-learn',     layer: 'base',      downloads: 159000000,  risk: 62, depRepos: 18000, maintainers: '~20 core',
     blast: '159M загрузок/мес. Классический ML — классификация, регрессия, кластеризация. Зависит от numpy и scipy.',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [],
+    attacks: [{ date: '2025', desc: 'Pickle-десериализация через joblib.load — модели scikit-learn хранятся в pickle, RCE через __reduce__' }], shape: 'circle' },
   { id: 'pillow',       label: 'Pillow',           layer: 'base',      downloads: 120000000,  risk: 45, depRepos: 15000, maintainers: '~5 core',
     blast: '120M загрузок/мес. Обработка изображений, критичен для всех CV-пайплайнов.',
     cves: [], attacks: [], shape: 'circle' },
@@ -447,28 +453,45 @@ const NODES = [
   { id: 'pytorch',      label: 'PyTorch',          layer: 'framework', downloads: 70800000,   risk: 92, depRepos: 30000, maintainers: '7 core',
     blast: '70.8M загрузок/мес. Всего 7 core-мейнтейнеров — критическая концентрация. Поставляет 13 NVIDIA CUDA-библиотек. Основной фреймворк для LLM-тренировки и инференса.',
     cves: [{ id: 'CVE-2025-32434', cvss: 9.3, desc: 'Обход weights_only=True в torch.load() — RCE через "безопасную" загрузку моделей' }],
-    attacks: [{ date: '2022-12', desc: 'torchtriton dependency confusion — эксфильтрация SSH-ключей через DNS tunneling' }], shape: 'circle' },
-  { id: 'tensorflow',   label: 'TensorFlow',       layer: 'framework', downloads: 21200000,   risk: 65, depRepos: 15000, maintainers: 'Google team',
+    attacks: [
+      { date: '2022-12', desc: 'torchtriton dependency confusion — эксфильтрация SSH-ключей через DNS tunneling' },
+      { date: '2024-11', desc: 'Free Hugs Part 2: TF exploit persistence — эксплойт из TF 2.15 работает в TF 2.18, pickle protocol 4 обходит сканеры' },
+      { date: '2025', desc: 'TorchScript (.pt): torch.jit.load выполняет произвольный код без песочницы — RCE через скомпилированные модели. Формат .pt/.pth = pickle + ZIP' }
+    ], shape: 'circle' },
+  { id: 'tensorflow',   label: 'TensorFlow',       layer: 'framework', downloads: 21200000,   risk: 70, depRepos: 15000, maintainers: 'Google team',
     blast: '21.2M загрузок/мес. Широко используется в production-системах и на мобильных устройствах (TFLite).',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'keras',         label: 'Keras',            layer: 'framework', downloads: 30000000,   risk: 55, depRepos: 10000, maintainers: 'Google/community',
-    blast: '30M загрузок/мес. Высокоуровневый API для TensorFlow и PyTorch. Широко используется для прототипирования и обучения моделей.',
-    cves: [], attacks: [], shape: 'circle' },
-  // HuggingFace ecosystem
-  { id: 'transformers', label: 'transformers',     layer: 'hf',        downloads: 104500000,  risk: 85, depRepos: 28575, maintainers: 'HF team (~20)',
-    blast: '104.5M загрузок/мес. Hub-пакет HF-экосистемы — все модели проходят через него. 28,575 GitHub-репо переиспользуют pretrained-модели.',
-    cves: [], attacks: [], shape: 'circle' },
-  { id: 'hf-hub',       label: 'huggingface-hub',  layer: 'hf',        downloads: 113500000,  risk: 90, depRepos: 20000, maintainers: 'HF team (~10)',
-    blast: '113.5M загрузок/мес. Компрометация затронет КАЖДЫЙ пакет HF-кластера одновременно. Через него проходят 45.4B совокупных загрузок моделей.',
     cves: [],
-    attacks: [{ date: '2024-02', desc: 'Namespace hijacking (AIJacking) — перехват удалённых аккаунтов, reverse shell через модели с 100K+ загрузок' }], shape: 'circle' },
+    attacks: [
+      { date: '2024-11', desc: 'Free Hugs Part 2: Lambda Layer exploit — marshal-десериализация в legacy h5-моделях, persistence через версии TF' },
+      { date: '2025', desc: 'SavedModel arbitrary ops: tf.py_function в SavedModel выполняет произвольный Python при tf.saved_model.load. Protobuf-формат без проверки ops' }
+    ], shape: 'circle' },
+  { id: 'keras',         label: 'Keras',            layer: 'framework', downloads: 30000000,   risk: 60, depRepos: 10000, maintainers: 'Google/community',
+    blast: '30M загрузок/мес. Высокоуровневый API для TensorFlow и PyTorch. Широко используется для прототипирования и обучения моделей.',
+    cves: [],
+    attacks: [{ date: '2024-12', desc: 'Free Hugs Part 3: from_pretrained_keras загружает legacy h5 с Lambda слоями — marshal RCE' }], shape: 'circle' },
+  // HuggingFace ecosystem
+  { id: 'transformers', label: 'transformers',     layer: 'hf',        downloads: 104500000,  risk: 90, depRepos: 28575, maintainers: 'HF team (~20)',
+    blast: '104.5M загрузок/мес. Hub-пакет HF-экосистемы — все модели проходят через него. 28,575 GitHub-репо переиспользуют pretrained-модели.',
+    cves: [{ id: 'CVE-2024-3568', cvss: 7.4, desc: 'Path traversal в Hugging Face Hub — извлечение файлов за пределы целевой директории' }],
+    attacks: [{ date: '2024-11', desc: 'Checkmarx Free Hugs: trust_remote_code обфускация — маскировка True через dict/str/expression в README' }], shape: 'circle' },
+  { id: 'hf-hub',       label: 'huggingface-hub',  layer: 'hf',        downloads: 113500000,  risk: 92, depRepos: 20000, maintainers: 'HF team (~10)',
+    blast: '113.5M загрузок/мес. Компрометация затронет КАЖДЫЙ пакет HF-кластера одновременно. Через него проходят 45.4B совокупных загрузок моделей.',
+    cves: [{ id: 'CVE-2024-3568', cvss: 7.4, desc: 'Path traversal — извлечение файлов за пределы целевой директории при загрузке моделей' }],
+    attacks: [
+      { date: '2024-02', desc: 'Namespace hijacking (AIJacking) — перехват удалённых аккаунтов, reverse shell через модели с 100K+ загрузок' },
+      { date: '2024-12', desc: 'Free Hugs Part 1: malicious auto_map в config.json — импорт произвольного Python при загрузке модели' }
+    ], shape: 'circle' },
   { id: 'tokenizers',   label: 'tokenizers',       layer: 'hf',        downloads: 78000000,   risk: 60, depRepos: 5000,  maintainers: 'HF team (~5)',
     blast: '78M загрузок/мес. Rust-реализация токенизации. Критичен для всех NLP-моделей.',
     cves: [], attacks: [], shape: 'circle' },
-  { id: 'safetensors',  label: 'safetensors',      layer: 'hf',        downloads: 47900000,   risk: 70, depRepos: 8000,  maintainers: 'HF team (~3)',
+  { id: 'safetensors',  label: 'safetensors',      layer: 'hf',        downloads: 47900000,   risk: 72, depRepos: 8000,  maintainers: 'HF team (~3)',
     blast: '47.9M загрузок/мес. Позиционируется как безопасная замена pickle. Core — ~400 строк Rust. Несмотря на это, 44.9% моделей всё ещё используют pickle.',
     cves: [],
-    attacks: [{ date: '2024-02', desc: 'Safetensors conversion service hijack — бот-конвертер использован для отравления моделей' }], shape: 'circle' },
+    attacks: [
+      { date: '2024-02', desc: 'Safetensors conversion service hijack — бот-конвертер использован для отравления моделей' },
+      { date: '2024-12', desc: 'Free Hugs Part 4: обход PickleScan через bdb.Bdb.run, pickle protocol 4, рекурсивный torch.load' },
+      { date: '2025', desc: 'Safetensors header bomb: JSON-заголовок до 100MB → DoS при парсинге. Metadata injection через произвольные ключи в header' }
+    ], shape: 'circle' },
   { id: 'datasets',     label: 'datasets',         layer: 'hf',        downloads: 46000000,   risk: 65, depRepos: 4000,  maintainers: 'HF team (~8)',
     blast: '46M загрузок/мес. Через него загружаются 500K+ датасетов. Найдено 9 вредоносных скриптов загрузки данных.',
     cves: [], attacks: [{ date: '2024', desc: '9 вредоносных dataset loading-скриптов обнаружены MalHug' }], shape: 'circle' },
@@ -496,9 +519,13 @@ const NODES = [
     attacks: [
       { date: '2025-04', desc: 'CVE-2025-32444 CVSS 10.0 — pickle RCE через Mooncake ZeroMQ, неавторизованный доступ' }
     ], shape: 'circle' },
-  { id: 'onnx',         label: 'ONNX Runtime',     layer: 'serving',   downloads: 22900000,   risk: 60, depRepos: 5000,  maintainers: 'Microsoft',
+  { id: 'onnx',         label: 'ONNX Runtime',     layer: 'serving',   downloads: 22900000,   risk: 68, depRepos: 5000,  maintainers: 'Microsoft',
     blast: '22.9M загрузок/мес. Кроссплатформенный инференс — используется Azure, Windows ML, многими edge-устройствами.',
-    cves: [], attacks: [], shape: 'circle' },
+    cves: [{ id: 'CVE-2024-27318', cvss: 7.5, desc: 'ONNX: path traversal через external_data — чтение произвольных файлов при загрузке модели' }],
+    attacks: [
+      { date: '2025', desc: 'Path traversal при извлечении ONNX-моделей + произвольное выполнение custom operators' },
+      { date: '2025', desc: 'ONNX Protobuf-формат: загрузка custom ops из shared libraries (.so/.dll) — выполнение произвольного нативного кода' }
+    ], shape: 'circle' },
   { id: 'triton',       label: 'Triton',           layer: 'serving',   downloads: 35700000,   risk: 75, depRepos: 3000,  maintainers: 'OpenAI/NVIDIA',
     blast: '35.7M загрузок/мес. GPU-компилятор, автозависимость PyTorch. Именно torchtriton стал целью dependency confusion атаки 2022.',
     cves: [],
@@ -511,14 +538,16 @@ const NODES = [
       { id: 'CVE-2025-68665', cvss: 8.6, desc: 'То же для JS-версии @langchain/core' }
     ],
     attacks: [
-      { date: '2025-12', desc: 'LangGrinch CVE-2025-68664 — утечка API-ключей и RCE через serialization injection' }
+      { date: '2025-12', desc: 'LangGrinch CVE-2025-68664 — утечка API-ключей и RCE через serialization injection' },
+      { date: '2025', desc: 'Prompt injection → Agent RCE: SQL injection через LangChain SQL Agent, утечка данных через tool calling' }
     ], shape: 'circle' },
   // New nodes from AI-Infra-Guard v3.6.2
   { id: 'ollama',       label: 'Ollama',           layer: 'serving',   downloads: 5000000,    risk: 85, depRepos: 3000,  maintainers: 'Ollama Inc (~10)',
     blast: '175K публичных серверов. RCE через OOB-write в GGUF, отсутствие аутентификации. Локальный инференс LLM.',
     cves: [
       { id: 'CVE-2025-63389', cvss: 8.5, desc: 'Отсутствие аутентификации API — несанкционированные операции с моделями' }
-    ], attacks: [], shape: 'circle' },
+    ],
+    attacks: [{ date: '2025', desc: 'GGUF/GGML парсинг: OOB write, heap overflow при загрузке специально сформированных моделей' }], shape: 'circle' },
   { id: 'mlflow',       label: 'MLflow',           layer: 'serving',   downloads: 20000000,   risk: 78, depRepos: 5000,  maintainers: 'LF AI (~20)',
     blast: '20M загрузок/мес. ML-lifecycle, model registry. Directory traversal → RCE (CVE-2025-11201).',
     cves: [
@@ -544,6 +573,31 @@ const NODES = [
     cves: [
       { id: 'CVE-2025-3466', cvss: 9.8, desc: 'Sandbox escape — выполнение кода с root-правами через code node' }
     ], attacks: [], shape: 'circle' },
+  // New nodes from XLSX/DOCX enrichment
+  { id: 'gradio',        label: 'Gradio',           layer: 'app',       downloads: 15000000,   risk: 72, depRepos: 5000,  maintainers: 'HF team (~10)',
+    blast: '15M загрузок/мес. ML-демо и интерфейсы. Arbitrary file read, SSRF, path traversal в истории. Основной инструмент для демо-интерфейсов моделей.',
+    cves: [{ id: 'CVE-2024-47084', cvss: 8.3, desc: 'SSRF через загрузку URL — доступ к внутренним сервисам и metadata' }],
+    attacks: [], shape: 'circle' },
+  { id: 'ray',           label: 'Ray',              layer: 'serving',   downloads: 8000000,    risk: 78, depRepos: 4000,  maintainers: 'Anyscale (~20)',
+    blast: '8M загрузок/мес. Распределённый ML-фреймворк. Dashboard без аутентификации → RCE. Pickle в Ray workers.',
+    cves: [{ id: 'CVE-2023-48022', cvss: 9.8, desc: 'Ray Dashboard без аутентификации — RCE через Job Submission API (ShadowRay)' }],
+    attacks: [{ date: '2024', desc: 'Ray ObjectStore: pickle-сериализация объектов между workers — RCE при компрометации одного узла кластера. Нет границ доверия' }], shape: 'circle' },
+  { id: 'wandb',         label: 'W&B',              layer: 'serving',   downloads: 5000000,    risk: 60, depRepos: 3000,  maintainers: 'Weights & Biases (~15)',
+    blast: '5M загрузок/мес. Tracking экспериментов. Десериализация артефактов, утечка API-ключей через логи.',
+    cves: [], attacks: [], shape: 'circle' },
+  { id: 'llamaindex',    label: 'LlamaIndex',       layer: 'app',       downloads: 8000000,    risk: 70, depRepos: 2000,  maintainers: 'LlamaIndex Inc (~15)',
+    blast: '8M загрузок/мес. RAG-фреймворк. Prompt injection → data exfiltration через retrieval-augmented generation.',
+    cves: [{ id: 'CVE-2024-45202', cvss: 7.5, desc: 'Prompt injection через poisoned documents в RAG-пайплайне' }],
+    attacks: [], shape: 'circle' },
+  // Serialization format core
+  { id: 'llama-cpp',     label: 'llama.cpp',        layer: 'serving',   downloads: 4000000,    risk: 80, depRepos: 6000,  maintainers: 'ggerganov + community (~30)',
+    blast: '4M загрузок/мес. Основной GGUF/GGML-парсер — ядро Ollama, LM Studio, GPT4All. Множественные heap overflow и OOB-write в парсинге тензоров. Компрометация затронет весь локальный LLM-инференс.',
+    cves: [
+      { id: 'CVE-2024-42479', cvss: 9.8, desc: 'GGUF: path traversal → arbitrary file overwrite при извлечении модели' },
+      { id: 'CVE-2024-25294', cvss: 8.8, desc: 'GGUF парсер: множественные heap buffer overflow при обработке тензоров' },
+      { id: 'CVE-2024-23605', cvss: 8.2, desc: 'Heap buffer overflow в gguf_fread_str — RCE через специально сформированную модель' }
+    ],
+    attacks: [{ date: '2024-08', desc: 'GGUF header manipulation: OOB write через специально сформированные размеры тензоров, обход проверок alignment' }], shape: 'circle' },
 ];
 
 // Edges: source DEPENDS ON target (arrow from source → target)
@@ -615,8 +669,10 @@ const EDGES = [
   { source: 'trl',          target: 'accelerate' },
   { source: 'trl',          target: 'datasets' },
   // Ollama
+  { source: 'ollama',       target: 'llama-cpp' },
   { source: 'ollama',       target: 'cuda' },
-  { source: 'ollama',       target: 'pytorch' },
+  // llama.cpp
+  { source: 'llama-cpp',    target: 'cuda' },
   // MLflow
   { source: 'mlflow',       target: 'pytorch' },
   { source: 'mlflow',       target: 'tensorflow' },
@@ -639,6 +695,25 @@ const EDGES = [
   { source: 'dify',         target: 'langchain' },
   { source: 'dify',         target: 'transformers' },
   { source: 'dify',         target: 'hf-hub' },
+  // Gradio
+  { source: 'gradio',       target: 'transformers' },
+  { source: 'gradio',       target: 'pytorch' },
+  { source: 'gradio',       target: 'hf-hub' },
+  { source: 'gradio',       target: 'numpy' },
+  { source: 'gradio',       target: 'pillow' },
+  // Ray
+  { source: 'ray',          target: 'pytorch' },
+  { source: 'ray',          target: 'numpy' },
+  { source: 'ray',          target: 'cuda' },
+  // W&B
+  { source: 'wandb',        target: 'pytorch' },
+  { source: 'wandb',        target: 'tensorflow' },
+  { source: 'wandb',        target: 'numpy' },
+  { source: 'wandb',        target: 'hf-hub' },
+  // LlamaIndex
+  { source: 'llamaindex',   target: 'langchain' },
+  { source: 'llamaindex',   target: 'transformers' },
+  { source: 'llamaindex',   target: 'hf-hub' },
 ];
 
 const INCIDENTS = [
@@ -658,6 +733,10 @@ const INCIDENTS = [
     desc: 'CVE-2025-68664: serialization injection в langchain-core. Утечка API-ключей через prompt injection + RCE.' },
   { id: 'inc8', date: '2026-01', label: 'Ni8mare: n8n unauth RCE', nodes: ['langflow', 'dify'],
     desc: 'CVE-2026-21858 CVSS 10.0: неаутентифицированный RCE в n8n. 100K+ серверов уязвимы. Волна атак на AI-workflow платформы.' },
+  { id: 'inc9', date: '2024-11', label: 'Checkmarx Free Hugs: HF ecosystem exploits', nodes: ['transformers', 'hf-hub', 'safetensors'],
+    desc: 'Серия Checkmarx Free Hugs Parts 1-4: trust_remote_code обфускация, pickle protocol 4 обход сканеров, bdb/pdb gadgets, exploit persistence через версии TF.' },
+  { id: 'inc10', date: '2024-08', label: 'GGUF parser RCE: llama.cpp heap overflows', nodes: ['llama-cpp', 'ollama'],
+    desc: 'Серия критических CVE в llama.cpp GGUF-парсере: heap buffer overflow (CVE-2024-25294), OOB write, path traversal (CVE-2024-42479 CVSS 9.8). Затронуты Ollama, LM Studio, GPT4All.' },
 ];
 
 // ══════════════════════════════════════════════════
@@ -779,8 +858,8 @@ function buildGraph() {
     base:      { x: W * 0.32, y: H * 0.82 },
     framework: { x: W * 0.3,  y: H * 0.5 },
     hf:        { x: W * 0.6,  y: H * 0.45 },
-    serving:   { x: W * 0.82, y: H * 0.3 },
-    app:       { x: W * 0.88, y: H * 0.72 },
+    serving:   { x: W * 0.8, y: H * 0.28 },
+    app:       { x: W * 0.85, y: H * 0.72 },
   };
 
   // Radius scale
@@ -866,7 +945,7 @@ function buildGraph() {
   // Force simulation
   simulation = d3.forceSimulation(nodesData)
     .force('link', d3.forceLink(edgesData).id(d => d.id).distance(120).strength(0.3))
-    .force('charge', d3.forceManyBody().strength(-400))
+    .force('charge', d3.forceManyBody().strength(-460))
     .force('x', d3.forceX(d => layerCenters[d.layer].x).strength(0.15))
     .force('y', d3.forceY(d => layerCenters[d.layer].y).strength(0.15))
     .force('collide', d3.forceCollide(d => d.r + 12).strength(0.8))
