@@ -122,6 +122,30 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   color: #556; margin-bottom: 12px; font-weight: 600;
 }
 
+/* ── Contact Banner ── */
+.contact-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; margin-bottom: 14px; border-radius: 6px;
+  background: rgba(0,229,255,0.04);
+  border: 1px solid rgba(0,229,255,0.12);
+  transition: border-color 0.2s, background 0.2s;
+  text-decoration: none;
+}
+.contact-banner:hover {
+  background: rgba(0,229,255,0.08);
+  border-color: rgba(0,229,255,0.3);
+}
+.contact-banner .contact-icon {
+  font-size: 16px; flex-shrink: 0;
+}
+.contact-banner .contact-text {
+  font-size: 10px; color: #889; line-height: 1.4;
+}
+.contact-banner .contact-text strong {
+  font-family: 'JetBrains Mono', monospace;
+  color: #00e5ff; font-weight: 600; font-size: 11px;
+}
+
 /* ── Stat Cards ── */
 .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
 .stat-card {
@@ -552,6 +576,61 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(255,145,0,0.2);
 }
 
+/* ── Research Library ── */
+.research-library { margin-bottom: 14px; }
+.research-collapse-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 4px 10px; border-radius: 4px; cursor: pointer;
+  border: 1px solid rgba(0,229,255,0.2); background: transparent; color: #556;
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  width: 100%; text-align: left; margin-bottom: 8px;
+}
+.research-collapse-btn:hover { color: #99b; border-color: rgba(0,229,255,0.4); }
+.research-collapse-btn .arrow { transition: transform 0.2s; }
+.research-collapse-btn.open .arrow { transform: rotate(90deg); }
+
+.attack-pattern-card {
+  padding: 8px 10px; margin-bottom: 6px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06); cursor: pointer;
+  background: rgba(255,255,255,0.02); transition: all 0.2s;
+}
+.attack-pattern-card:hover { background: rgba(255,255,255,0.05); }
+.attack-pattern-card .pattern-title {
+  font-size: 11px; font-weight: 600; margin-bottom: 3px;
+  display: flex; align-items: center; gap: 6px;
+}
+.attack-pattern-card .pattern-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.attack-pattern-card .pattern-desc {
+  font-size: 10px; color: #667; line-height: 1.4;
+}
+.attack-pattern-card .pattern-nodes {
+  display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px;
+}
+.attack-pattern-card .pattern-node-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 1px 5px; border-radius: 3px;
+  background: rgba(255,255,255,0.05); color: #889;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.ref-category { margin-bottom: 8px; }
+.ref-category-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: #00e5ff; text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.ref-item {
+  font-size: 10px; color: #889; padding: 2px 0; line-height: 1.4;
+}
+.ref-item a { color: #00e5ff; text-decoration: none; }
+.ref-item a:hover { text-decoration: underline; }
+.ref-item .ref-venue {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: #556; margin-left: 4px;
+}
+
 /* ── Search highlight ring ── */
 @keyframes searchPing {
   0% { stroke-opacity: 0.9; stroke-width: 4; }
@@ -598,6 +677,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div style="margin-bottom:12px;font-size:11px;color:#667;"><a href="https://t.me/pwnai" target="_blank" rel="noopener" style="color:#00e5ff;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:11px;">@pwnai</a> <span style="color:#445;font-size:10px;">on Telegram</span></div>
+    <a class="contact-banner" href="https://t.me/wearetyomsmnv" target="_blank" rel="noopener">
+      <span class="contact-icon">&#9993;</span>
+      <div class="contact-text">Ideas or suggestions? Reach out to <strong>@wearetyomsmnv</strong> on Telegram</div>
+    </a>
     <div class="sidebar-section-title">Key Ecosystem Metrics</div>
     <div class="stat-cards">
       <div class="stat-card">
@@ -691,7 +774,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
     <div class="research-credit">
       <div class="research-credit-title">Supply Chain Research</div>
       <div class="research-credit-text">
-        Interactive dependency &amp; attack surface map of the ML/AI ecosystem. 56 packages, 128 edges, 14 real-world incidents. Data as of Q1 2026.<br>
+        Interactive dependency &amp; attack surface map of the ML/AI ecosystem. 75 packages, 190 edges, 23 real-world incidents. Data as of Q1 2026.<br>
         Built by <a href="https://t.me/pwnai" target="_blank" rel="noopener">@pwnai</a>
       </div>
       <div style="margin-top:6px;">
@@ -700,6 +783,19 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
         <span class="research-tag">dependency risk</span>
         <span class="research-tag">BFS simulation</span>
       </div>
+    </div>
+
+    <!-- Section: Research Library -->
+    <div class="sidebar-section-title">Research Library</div>
+    <div class="research-library">
+      <button class="research-collapse-btn open" id="patternsToggle" onclick="toggleResearchSection('patterns')">
+        <span class="arrow">&#9654;</span> Attack Patterns (5)
+      </button>
+      <div id="patternsContent"></div>
+      <button class="research-collapse-btn" id="refsToggle" onclick="toggleResearchSection('refs')">
+        <span class="arrow">&#9654;</span> Academic References (16)
+      </button>
+      <div id="refsContent" style="display:none;"></div>
     </div>
 
     <!-- Node detail panel -->
@@ -886,16 +982,19 @@ const NODES = [
       { actor: 'supply-chain', vector: 'Dependency confusion (torchtriton 2022 incident proved this works)' },
       { actor: 'crime', vector: 'Cryptomining via torch.load() RCE on GPU servers' }
     ], shape: 'circle' },
-  { id: 'tensorflow',   label: 'TensorFlow',       layer: 'framework', downloads: 21200000,   risk: 70, depRepos: 15000, maintainers: 'Google team', since: 2020,
-    blast: '21.2M downloads/mo. Widely used in production systems and mobile devices (TFLite).',
-    cves: [],
+  { id: 'tensorflow',   label: 'TensorFlow',       layer: 'framework', downloads: 21200000,   risk: 78, depRepos: 15000, maintainers: 'Google team', since: 2020,
+    blast: '21.2M downloads/mo. 3 separate attack surfaces: pickle serialization, protobuf parsing, legitimate API abuse (TensorAbuse S&P\'25). CVE-2024-3660: Keras Lambda = arbitrary code in any model.',
+    cves: [
+      { id: 'CVE-2024-3660', cvss: 9.8, desc: 'Keras 2 Lambda Layers \u2014 arbitrary code injection via Lambda in .h5/SavedModel. Any model.load() with Lambda = code execution (CERT/CC VU#253266)' }
+    ],
     attacks: [
       { date: '2024-11', desc: 'Free Hugs Part 2: Lambda Layer exploit \u2014 marshal deserialization in legacy h5 models, persistence across TF versions' },
+      { date: '2025', desc: 'TensorAbuse (S&P\'25): legitimate TF APIs (Lambda, custom objects, TFLite delegates) create full-featured malware inside models. Model = file + executable code' },
       { date: '2025', desc: 'SavedModel arbitrary ops: tf.py_function in SavedModel executes arbitrary Python on tf.saved_model.load. Protobuf format without ops validation' }
     ],
     threats: [
-      { actor: 'supply-chain', vector: 'Compromised release via build pipeline targeting production/mobile (TFLite)' },
-      { actor: 'opportunist', vector: 'Exploiting legacy SavedModel/h5 deserialization (Free Hugs research)' }
+      { actor: 'supply-chain', vector: 'Model-as-Malware: TensorAbuse proves legitimate TF APIs create malware inside models (S&P\'25)' },
+      { actor: 'opportunist', vector: 'CVE-2024-3660: any model with Keras Lambda layer = arbitrary code execution' }
     ], shape: 'circle' },
   { id: 'keras',         label: 'Keras',            layer: 'framework', downloads: 17000000,   risk: 60, depRepos: 10000, maintainers: 'Google/community', since: 2020,
     blast: '17M downloads/mo. High-level API for TensorFlow and PyTorch. Widely used for prototyping and model training.',
@@ -919,15 +1018,18 @@ const NODES = [
       { actor: 'supply-chain', vector: 'Malicious auto_map config or trust_remote_code obfuscation in model repos' },
       { actor: 'crime', vector: 'Data exfiltration via backdoored pretrained models (28K+ dependent repos)' }
     ], shape: 'circle' },
-  { id: 'hf-hub',       label: 'huggingface-hub',  layer: 'hf',        downloads: 163000000,  risk: 92, depRepos: 20000, maintainers: 'HF team (~10)', since: 2020,
-    blast: '163M downloads/mo. Compromise would affect EVERY HF cluster package simultaneously. 45.4B cumulative model downloads pass through it.',
+  { id: 'hf-hub',       label: 'huggingface-hub',  layer: 'hf',        downloads: 163000000,  risk: 95, depRepos: 20000, maintainers: 'HF team (~10)', since: 2020,
+    blast: '163M downloads/mo. MOST INCIDENT-DENSE node: API token exposure (1500+ tokens), AI Jacking, silent backdoor models, cross-tenant escape, picklescan bypasses, 9+ malicious datasets. 45.4B cumulative downloads.',
     cves: [{ id: 'CVE-2024-3568', cvss: 7.4, desc: 'Path traversal \u2014 file extraction beyond target directory during model download' }],
     attacks: [
+      { date: '2023-12', desc: 'Lasso Security: 1500+ HF API tokens found on GitHub with write-access to Meta-Llama, Bloom, Pythia repos. Could backdoor model weights' },
       { date: '2024-02', desc: 'Namespace hijacking (AIJacking) \u2014 takeover of deleted accounts, reverse shell via models with 100K+ downloads' },
+      { date: '2024', desc: 'Legit Security: CI/CD pipeline injection via malicious PR \u2014 hijack of any HF repo through CI workflow exploitation' },
+      { date: '2024', desc: 'Wiz Research: cross-tenant attack on HF Inference API \u2014 container escape \u2192 access to other users\' models and data' },
       { date: '2024-12', desc: 'Free Hugs Part 1: malicious auto_map in config.json \u2014 arbitrary Python import during model loading' }
     ],
     threats: [
-      { actor: 'supply-chain', vector: 'Namespace hijacking of deleted accounts to serve malicious models' },
+      { actor: 'supply-chain', vector: 'Most incident-dense node: token exposure, CI/CD hijack, silent backdoors, picklescan bypasses' },
       { actor: 'crime', vector: 'Mass distribution of trojanized models via the hub (45.4B cumulative downloads)' },
       { actor: 'insider', vector: 'Rogue employee \u2014 hub compromise would affect every HF package simultaneously' }
     ], shape: 'circle' },
@@ -943,12 +1045,13 @@ const NODES = [
     cves: [],
     attacks: [
       { date: '2024-02', desc: 'Safetensors conversion service hijack \u2014 converter bot used to poison models' },
+      { date: '2024', desc: 'JFrog ML Bug Bonanza: even safetensors format has attack surface via metadata manipulation \u2014 information leakage and DoS. "Safe" is relative' },
       { date: '2024-12', desc: 'Free Hugs Part 4: PickleScan bypass via bdb.Bdb.run, pickle protocol 4, recursive torch.load' },
       { date: '2025', desc: 'Safetensors header bomb: JSON header up to 100MB \u2192 DoS during parsing. Metadata injection via arbitrary header keys' }
     ],
     threats: [
       { actor: 'insider', vector: 'Only ~3 maintainers for the "safe" format \u2014 extreme concentration risk' },
-      { actor: 'supply-chain', vector: 'Conversion service hijack to poison models during pickle\u2192safetensors migration' }
+      { actor: 'supply-chain', vector: 'JFrog proved "safe" formats still have attack surface \u2014 metadata manipulation, DoS, info leakage' }
     ], shape: 'circle' },
   { id: 'datasets',     label: 'datasets',         layer: 'hf',        downloads: 46000000,   risk: 65, depRepos: 4000,  maintainers: 'HF team (~8)', since: 2020,
     blast: '46M downloads/mo. 500K+ datasets loaded through it. 9 malicious data loading scripts found.',
@@ -996,14 +1099,17 @@ const NODES = [
       { id: 'CVE-2025-62164', cvss: 9.1, desc: 'RCE via prompt embeddings deserialization (Wiz)' },
       { id: 'CVE-2025-66448', cvss: 9.8, desc: 'RCE via auto_map even when trust_remote_code=False' },
       { id: 'CVE-2024-9053', cvss: 9.8, desc: 'Pickle RCE in AsyncEngineRPCServer \u2014 arbitrary code execution via deserialization' },
-      { id: 'CVE-2024-9052', cvss: 9.1, desc: 'Pickle RCE in recv_object \u2014 untrusted deserialization in RPC communication' }
+      { id: 'CVE-2024-9052', cvss: 9.1, desc: 'Pickle RCE in recv_object \u2014 untrusted deserialization in RPC communication' },
+      { id: 'CVE-2025-30165', cvss: 8.0, desc: 'ShadowMQ \u2014 unsafe pickle deserialization via ZeroMQ recv_pyobj(). Root of cross-framework propagation pattern' }
     ],
     attacks: [
-      { date: '2025-04', desc: 'CVE-2025-32444 CVSS 10.0 \u2014 pickle RCE via Mooncake ZeroMQ, unauthorized access' }
+      { date: '2025-04', desc: 'CVE-2025-32444 CVSS 10.0 \u2014 pickle RCE via Mooncake ZeroMQ, unauthorized access' },
+      { date: '2025-11', desc: 'ShadowMQ: CVE-2025-30165 pickle/ZMQ vulnerability propagated to SGLang, TensorRT-LLM, Modular via code copy-paste' },
+      { date: '2025', desc: 'KV-Cache Sharing Prompt Leakage (NDSS\'25): in multi-tenant serving, shared PagedAttention KV-cache allows cross-tenant prompt extraction' }
     ],
     threats: [
       { actor: 'crime', vector: 'Cryptomining on GPU inference servers via RCE (CVE-2025-32444 CVSS 10.0)' },
-      { actor: 'opportunist', vector: 'Exploiting public PoCs for Mooncake pickle RCE or video processing heap overflow' },
+      { actor: 'opportunist', vector: 'Multi-tenant prompt leakage via shared KV-cache (PagedAttention) \u2014 NDSS\'25 research' },
       { actor: 'supply-chain', vector: 'Malicious dependency in 60+ direct deps (~150 transitive)' }
     ], shape: 'circle' },
   { id: 'onnx',         label: 'ONNX Runtime',     layer: 'serving',   downloads: 22900000,   risk: 68, depRepos: 5000,  maintainers: 'Microsoft', since: 2020,
@@ -1038,11 +1144,12 @@ const NODES = [
     ],
     attacks: [
       { date: '2025-12', desc: 'LangGrinch CVE-2025-68664 \u2014 API key leakage and RCE via serialization injection' },
-      { date: '2025', desc: 'Prompt injection \u2192 Agent RCE: SQL injection via LangChain SQL Agent, data leakage via tool calling' }
+      { date: '2025', desc: 'Prompt injection \u2192 Agent RCE: SQL injection via LangChain SQL Agent, data leakage via tool calling' },
+      { date: '2024', desc: 'LLMSmith (CCS\'24): systematic RCE discovery tool found real RCE chains in LangChain. Confirms LLM frameworks = persistent RCE surface, not one-off bugs' }
     ],
     threats: [
       { actor: 'crime', vector: 'API key and secret extraction via serialization injection (LangGrinch)' },
-      { actor: 'opportunist', vector: 'Prompt injection \u2192 SQL injection \u2192 RCE via LangChain SQL Agent' },
+      { actor: 'opportunist', vector: 'Systematic RCE surface confirmed by LLMSmith (CCS\'24) + prompt injection \u2192 SQL/OS injection chains' },
       { actor: 'supply-chain', vector: 'Malicious tool/chain in the fast-growing LangChain ecosystem' }
     ], shape: 'circle' },
   // Serving nodes
@@ -1092,14 +1199,17 @@ const NODES = [
       { actor: 'opportunist', vector: 'Pickle RCE on exposed distributed workers (CVE-2024-10096)' },
       { actor: 'crime', vector: 'Hijacking distributed compute clusters for cryptomining' }
     ], shape: 'circle' },
-  { id: 'langflow',     label: 'Langflow',         layer: 'app',       downloads: 2000000,    risk: 82, depRepos: 1500,  maintainers: 'DataStax (~15)', since: 2023,
-    blast: '2M downloads/mo. 9 CVEs including multiple RCE and code injection. Visual LLM application builder.',
+  { id: 'langflow',     label: 'Langflow',         layer: 'app',       downloads: 2000000,    risk: 88, depRepos: 1500,  maintainers: 'DataStax (~15)', since: 2023,
+    blast: '2M downloads/mo. 79K+ GitHub stars. CVE-2025-3248 added to CISA KEV. Active Flodrix botnet exploitation for DDoS and data exfiltration.',
     cves: [
-      { id: 'CVE-2025-3248', cvss: 9.8, desc: 'Unauthenticated RCE via /api/v1/validate/code \u2014 arbitrary Python code execution' }
-    ], attacks: [],
+      { id: 'CVE-2025-3248', cvss: 9.8, desc: 'Unauthenticated RCE via /api/v1/validate/code \u2014 arbitrary Python code execution. CISA KEV 2025-05-05' }
+    ],
+    attacks: [
+      { date: '2025-05', desc: 'CVE-2025-3248 added to CISA KEV. Flodrix botnet actively exploiting for DDoS and data exfiltration. Public PoC on GitHub' }
+    ],
     threats: [
-      { actor: 'opportunist', vector: 'Unauthenticated RCE via /api/v1/validate/code (CVE-2025-3248 CVSS 9.8)' },
-      { actor: 'crime', vector: 'Data theft from visual LLM workflows processing sensitive documents' }
+      { actor: 'opportunist', vector: 'Unauthenticated RCE via /api/v1/validate/code (CVE-2025-3248 CVSS 9.8, CISA KEV)' },
+      { actor: 'crime', vector: 'Flodrix botnet: active DDoS and data exfiltration campaign (Trend Micro confirmed)' }
     ], shape: 'circle' },
   { id: 'dify',         label: 'Dify',             layer: 'app',       downloads: 3000000,    risk: 80, depRepos: 2000,  maintainers: 'Dify Inc (~20)', since: 2023,
     blast: '3M downloads/mo. Sandbox escape with root privileges (CVE-2025-3466, CVSS 9.8). LLM platform.',
@@ -1126,13 +1236,17 @@ const NODES = [
       { actor: 'opportunist', vector: 'Arbitrary file read and SSRF via URL upload (CVE-2024-47084)' },
       { actor: 'supply-chain', vector: 'Trojanized Gradio spaces serving malicious model demos' }
     ], shape: 'circle' },
-  { id: 'ray',           label: 'Ray',              layer: 'serving',   downloads: 8000000,    risk: 78, depRepos: 4000,  maintainers: 'Anyscale (~20)', since: 2024,
-    blast: '8M downloads/mo. Distributed ML framework. Unauthenticated dashboard \u2192 RCE. Pickle in Ray workers.',
-    cves: [{ id: 'CVE-2023-48022', cvss: 9.8, desc: 'Unauthenticated Ray Dashboard \u2014 RCE via Job Submission API (ShadowRay)' }],
-    attacks: [{ date: '2024', desc: 'Ray ObjectStore: pickle serialization of objects between workers \u2014 RCE upon compromising a single cluster node. No trust boundaries' }],
+  { id: 'ray',           label: 'Ray',              layer: 'serving',   downloads: 8000000,    risk: 92, depRepos: 4000,  maintainers: 'Anyscale (~20)', since: 2024,
+    blast: '8M downloads/mo. 230K+ exposed servers. ShadowRay: CVE-2023-48022 actively exploited, CVE NOT PATCHED (Anyscale considers it design decision). ShadowRay 2.0: self-propagating botnet.',
+    cves: [{ id: 'CVE-2023-48022', cvss: 9.8, desc: 'Unauthenticated Ray Dashboard \u2014 RCE via Job Submission API (ShadowRay). NOT PATCHED \u2014 design decision' }],
+    attacks: [
+      { date: '2024-03', desc: 'ShadowRay: 230K+ exposed Ray servers. Cryptomining (XMRig), data theft, DDoS. Botnet families RondoDox, MooBot, KmsdBot integrated exploit' },
+      { date: '2025-11', desc: 'ShadowRay 2.0: self-propagating botnet by IronErn440. AI-generated payloads, worm-like spreading between Ray clusters' },
+      { date: '2024', desc: 'Ray ObjectStore: pickle serialization between workers \u2014 RCE upon compromising a single cluster node. No trust boundaries' }
+    ],
     threats: [
-      { actor: 'crime', vector: 'Cryptomining via ShadowRay \u2014 unauthenticated dashboard RCE on compute clusters' },
-      { actor: 'opportunist', vector: 'Pickle RCE between Ray workers with no trust boundaries' }
+      { actor: 'crime', vector: 'ShadowRay mass exploitation \u2014 230K+ servers, cryptomining, data theft, DDoS botnets' },
+      { actor: 'opportunist', vector: 'CVE NOT PATCHED (design decision) \u2014 any exposed Ray dashboard = immediate RCE' }
     ], shape: 'circle' },
   { id: 'wandb',         label: 'W&B',              layer: 'serving',   downloads: 5000000,    risk: 60, depRepos: 3000,  maintainers: 'Weights & Biases (~15)', since: 2024,
     blast: '5M downloads/mo. Experiment tracking. Artifact deserialization, API key leakage via logs.',
@@ -1149,23 +1263,29 @@ const NODES = [
       { id: 'CVE-2025-1750', cvss: 9.1, desc: 'SQL injection in DuckDB \u2192 RCE \u2014 arbitrary code execution via crafted queries' },
       { id: 'CVE-2025-1753', cvss: 8.8, desc: 'CLI command injection \u2014 OS command execution via crafted CLI arguments' }
     ],
-    attacks: [],
+    attacks: [
+      { date: '2024', desc: 'LLMSmith (CCS\'24): systematic RCE discovery tool found real RCE chains in LlamaIndex. LLM4Shell (BlackHat Asia\'24) demoed practical exploit chains' }
+    ],
     threats: [
       { actor: 'crime', vector: 'Data exfiltration from RAG pipelines processing confidential documents' },
-      { actor: 'opportunist', vector: 'Prompt injection via poisoned documents in retrieval pipeline' }
+      { actor: 'opportunist', vector: 'Systematic RCE surface (LLMSmith CCS\'24) + prompt injection via poisoned documents' }
     ], shape: 'circle' },
   // Serialization format core
-  { id: 'llama-cpp',     label: 'llama.cpp',        layer: 'serving',   downloads: 4000000,    risk: 80, depRepos: 6000,  maintainers: 'ggerganov + community (~30)', since: 2023,
-    blast: '4M downloads/mo. Core GGUF/GGML parser \u2014 backbone of Ollama, LM Studio, GPT4All. Multiple heap overflow and OOB-write in tensor parsing. Compromise would affect all local LLM inference.',
+  { id: 'llama-cpp',     label: 'llama.cpp',        layer: 'serving',   downloads: 4000000,    risk: 85, depRepos: 6000,  maintainers: 'ggerganov + community (~30)', since: 2023,
+    blast: '4M downloads/mo, 75K+ GitHub stars. Core GGUF/GGML parser \u2014 backbone of Ollama, LM Studio, GPT4All. CVE-2024-34359: GGUF metadata Jinja2 injection \u2192 RCE destroys "safe format" assumption.',
     cves: [
       { id: 'CVE-2024-42479', cvss: 9.8, desc: 'GGUF: path traversal \u2192 arbitrary file overwrite during model extraction' },
+      { id: 'CVE-2024-34359', cvss: 9.6, desc: 'GGUF metadata Jinja2 template injection \u2192 RCE via crafted model. Destroys "safe format" assumption. Affects llama-cpp-python, LocalAI, Ollama, GPT4All' },
       { id: 'CVE-2024-25294', cvss: 8.8, desc: 'GGUF parser: multiple heap buffer overflows during tensor processing' },
       { id: 'CVE-2024-23605', cvss: 8.2, desc: 'Heap buffer overflow in gguf_fread_str \u2014 RCE via crafted model' }
     ],
-    attacks: [{ date: '2024-08', desc: 'GGUF header manipulation: OOB write via crafted tensor sizes, alignment check bypass' }],
+    attacks: [
+      { date: '2024-08', desc: 'GGUF header manipulation: OOB write via crafted tensor sizes, alignment check bypass' },
+      { date: '2024', desc: 'CVE-2024-34359: Jinja2 template injection in GGUF metadata field. GGUF considered "safe" \u2014 this CVE breaks that assumption for entire local inference ecosystem' }
+    ],
     threats: [
-      { actor: 'supply-chain', vector: 'Malicious GGUF model files with crafted headers \u2014 affects Ollama, LM Studio, GPT4All' },
-      { actor: 'opportunist', vector: 'Heap buffer overflow via crafted tensor data (multiple CVEs)' }
+      { actor: 'supply-chain', vector: 'Malicious GGUF models with Jinja2 payload in metadata \u2014 RCE on Ollama, LM Studio, GPT4All, LocalAI' },
+      { actor: 'opportunist', vector: 'Heap buffer overflow + template injection via crafted GGUF models (multiple CVEs)' }
     ], shape: 'circle' },
   // Agentic frameworks — now in 'agents' layer
   { id: 'crewai',        label: 'CrewAI',           layer: 'agents',    downloads: 1000000,    risk: 75, depRepos: 2000,  maintainers: 'CrewAI Inc (~15)', since: 2023,
@@ -1371,12 +1491,12 @@ const NODES = [
       { actor: 'crime', vector: 'Enterprise API key harvesting from cloud deployments' }
     ], shape: 'circle' },
   { id: 'gigachat-sdk',   label: 'GigaChat SDK',     layer: 'serving',   downloads: 54000,      risk: 45, depRepos: 200,   maintainers: 'Sber AI (~5)', since: 2023,
-    blast: '54K downloads/mo. Sber GigaChat REST API SDK. Uses Russian Ministry of Digital Development certificate chain. Part of GigaChain ecosystem with langchain-gigachat.',
+    blast: '54K downloads/mo. Sber GigaChat REST API SDK. Part of GigaChain ecosystem with langchain-gigachat.',
     cves: [],
     attacks: [],
     threats: [
-      { actor: 'supply-chain', vector: 'Custom certificate chain from Russian Ministry — additional trust surface beyond standard CAs' },
-      { actor: 'nation-state', vector: 'Government-issued certificates create unique supply chain risk for non-Russian users' }
+      { actor: 'supply-chain', vector: 'Smaller ecosystem SDK — less community security review than major providers' },
+      { actor: 'crime', vector: 'Enterprise API key harvesting from GigaChat deployments' }
     ], shape: 'circle' },
   { id: 'groq-sdk',       label: 'Groq SDK',         layer: 'serving',   downloads: 1900000,    risk: 48, depRepos: 1000,  maintainers: 'Groq (~10)', since: 2024,
     blast: '1.9M downloads/mo. SDK for Groq ultra-fast LPU inference. Growing rapidly as fastest inference provider.',
@@ -1386,6 +1506,198 @@ const NODES = [
       { actor: 'supply-chain', vector: 'Fast-growing SDK — rapidly increasing attack surface as Groq adoption grows' },
       { actor: 'crime', vector: 'API key theft targeting high-performance inference endpoints' }
     ], shape: 'circle' },
+  // ── Enrichment: Base Libraries ──
+  { id: 'protobuf',      label: 'protobuf',         layer: 'base',      downloads: 300000000,  risk: 82, depRepos: 40000, maintainers: 'Google (~10)', since: 2020,
+    blast: '300M downloads/mo. Google Protocol Buffers — serialization for TensorFlow, ONNX, gRPC. Compromise = compromise of all model serving.',
+    cves: [
+      { id: 'CVE-2025-4565', cvss: 8.2, desc: 'Uncontrolled recursion in Pure-Python backend — DoS via recursive group/message/SGROUP parsing' },
+      { id: 'CVE-2024-7254', cvss: 7.5, desc: 'Stack Overflow — unbounded recursion via nested groups and map fields in DiscardUnknownFieldsParser' }
+    ], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Foundation serialization for TF/ONNX/gRPC — compromise propagates to entire model serving stack' },
+      { actor: 'opportunist', vector: 'DoS via recursive message parsing (CVE-2025-4565 CVSS 8.2)' }
+    ], shape: 'circle' },
+  { id: 'opencv-python', label: 'OpenCV',           layer: 'base',      downloads: 90000000,   risk: 78, depRepos: 20000, maintainers: 'OpenCV team (~15)', since: 2020,
+    blast: '90M downloads/mo. Computer Vision C++ library. Crafted image → RCE on inference servers. All CV pipelines (YOLO, diffusers) depend on it.',
+    cves: [
+      { id: 'CVE-2025-53644', cvss: 8.8, desc: 'Uninitialized pointer → arbitrary heap buffer write via crafted JPEG' },
+      { id: 'CVE-2019-5063', cvss: 8.8, desc: 'Heap buffer overflow in imgcodecs — RCE via crafted image files' },
+      { id: 'CVE-2017-15293', cvss: 7.5, desc: 'Unauthorized access to RTSP streams without authentication' }
+    ], attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Heap buffer overflow via crafted images — RCE on inference servers processing untrusted input' },
+      { actor: 'supply-chain', vector: 'Native C++ code — malicious release with backdoor in image processing routines' }
+    ], shape: 'circle' },
+  { id: 'pyarrow',       label: 'PyArrow',          layer: 'base',      downloads: 200000000,  risk: 90, depRepos: 25000, maintainers: 'Apache Arrow (~20)', since: 2020,
+    blast: '200M downloads/mo. Apache Arrow Python bindings. CVE-2023-47248 CVSS 9.8, EPSS 87% — RCE via any .parquet file. Foundation for Pandas 2.0+, HF datasets, Spark.',
+    cves: [
+      { id: 'CVE-2023-47248', cvss: 9.8, desc: 'Deserialization of untrusted data in IPC/Parquet/Feather → arbitrary code execution (EPSS 87.29%)' }
+    ],
+    attacks: [{ date: '2023', desc: 'CVE-2023-47248: actively exploited — RCE via .parquet/.feather/.arrow files. Versions 0.14.0–14.0.0' }],
+    threats: [
+      { actor: 'opportunist', vector: 'RCE via untrusted .parquet files — EPSS 87%, one of most exploited ML CVEs (CVE-2023-47248)' },
+      { actor: 'supply-chain', vector: 'Foundation for Pandas/HF datasets/Spark — single CVE propagates to entire data pipeline' }
+    ], shape: 'circle' },
+  { id: 'pydantic',      label: 'Pydantic',         layer: 'base',      downloads: 370000000,  risk: 55, depRepos: 50000, maintainers: 'Samuel Colvin (~5)', since: 2020,
+    blast: '370M downloads/mo. Data validation gate-keeper for FastAPI, LangChain, vLLM, OpenAI SDK. If pydantic is bypassed, all downstream validation fails.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Validation gate-keeper — compromise bypasses input validation in FastAPI/LangChain/vLLM/OpenAI SDK' },
+      { actor: 'insider', vector: 'Small maintainer team (~5) for 370M monthly downloads — high concentration risk' }
+    ], shape: 'circle' },
+  { id: 'setuptools',    label: 'setuptools',       layer: 'base',      downloads: 300000000,  risk: 85, depRepos: 100000, maintainers: 'PyPA (~10)', since: 2020,
+    blast: '300M downloads/mo. Python build system. setup.py install hooks = arbitrary code execution by design. Root vector for ALL pip install supply chain attacks.',
+    cves: [], attacks: [
+      { date: '2024', desc: 'setup.py install hooks — arbitrary code execution on pip install. Used in all malicious PyPI packages (Ultralytics, torchtriton, etc.)' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'ROOT attack vector — setup.py hooks execute arbitrary code during pip install. Used in every PyPI supply chain attack' },
+      { actor: 'crime', vector: 'Malicious packages exploit setup.py for cryptomining, credential theft, reverse shells' }
+    ], shape: 'circle' },
+  // ── Enrichment: ML Frameworks ──
+  { id: 'jax',           label: 'JAX',              layer: 'framework', downloads: 15000000,   risk: 68, depRepos: 5000,  maintainers: 'Google Brain (~20)', since: 2020,
+    blast: '15M downloads/mo. Google ML framework with XLA compiler. Used for Gemini training. Separate Google ML stack branch not otherwise represented.',
+    cves: [], attacks: [
+      { date: '2024', desc: 'Pickle serialization by default for JAX arrays — same RCE vectors as PyTorch pickle' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Parallel GPU stack (JAX → XLA → CUDA) — separate attack surface from PyTorch chain' },
+      { actor: 'opportunist', vector: 'Default pickle serialization for model checkpoints — RCE via untrusted JAX models' }
+    ], shape: 'circle' },
+  { id: 'xgboost',       label: 'XGBoost',          layer: 'framework', downloads: 30000000,   risk: 70, depRepos: 8000,  maintainers: 'DMLC (~15)', since: 2020,
+    blast: '30M downloads/mo. Dominant gradient boosting in production ML (banking, fintech, healthcare). Pickle model serialization → RCE.',
+    cves: [
+      { id: 'CVE-2024-37056', cvss: 8.5, desc: 'Deserialization of untrusted XGBoost/LightGBM models via MLflow → arbitrary code execution' }
+    ],
+    attacks: [{ date: '2024', desc: 'Pickle serialization of XGBoost models — RCE when loading untrusted .pkl model files in production' }],
+    threats: [
+      { actor: 'opportunist', vector: 'Pickle model deserialization → RCE in production banking/fintech/healthcare ML systems' },
+      { actor: 'supply-chain', vector: 'Trojanized XGBoost models distributed via MLflow/model registries' }
+    ], shape: 'circle' },
+  { id: 'ultralytics',   label: 'Ultralytics',      layer: 'framework', downloads: 25000000,   risk: 88, depRepos: 10000, maintainers: 'Ultralytics Inc (~15)', since: 2023,
+    blast: '25M downloads/mo. YOLOv8/v11 computer vision. 33K+ GitHub stars. Supply chain compromise Dec 2024 — XMRig cryptominer in official PyPI release via GitHub Actions CI/CD injection.',
+    cves: [],
+    attacks: [
+      { date: '2024-12', desc: 'Supply chain compromise: versions 8.3.41/42/45/46 contained XMRig cryptominer. GitHub Actions script injection via malicious branch name. Fix version also compromised' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Canonical ML supply chain attack — CI/CD pipeline compromise via GitHub Actions script injection' },
+      { actor: 'crime', vector: 'Cryptomining via compromised official PyPI releases affecting 60M+ total downloads' }
+    ], shape: 'circle' },
+  // ── Enrichment: Serving & Infrastructure ──
+  { id: 'fastapi',       label: 'FastAPI',          layer: 'serving',   downloads: 40000000,   risk: 80, depRepos: 50000, maintainers: 'Sebastián Ramírez (~5)', since: 2020,
+    blast: '40M downloads/mo. THE Python web framework for ML serving. vLLM, BentoML, Gradio, LangServe, MLflow ALL built on FastAPI. Vulnerability here = vulnerability in all ML serving.',
+    cves: [
+      { id: 'CVE-2024-47874', cvss: 8.7, desc: 'Critical vulnerability in Starlette ASGI framework (base of FastAPI)' },
+      { id: 'CVE-2024-24762', cvss: 7.5, desc: 'ReDoS in python-multipart — DoS via crafted Content-Type header' },
+      { id: 'CVE-2025-68481', cvss: 8.1, desc: 'OAuth Account Takeover in FastAPI Users — unvalidated OAuth tokens' },
+      { id: 'CVE-2025-14546', cvss: 7.5, desc: 'CSRF in fastapi-sso — improper OAuth state validation' }
+    ], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Foundation for ALL ML serving (vLLM, BentoML, Gradio, MLflow) — single point of failure' },
+      { actor: 'opportunist', vector: 'Starlette/ASGI vulnerabilities propagate to every FastAPI-based ML API' }
+    ], shape: 'circle' },
+  { id: 'sglang',        label: 'SGLang',           layer: 'serving',   downloads: 2000000,    risk: 82, depRepos: 1000,  maintainers: 'Berkeley (~15)', since: 2024,
+    blast: 'Berkeley LLM inference server, vLLM competitor. ShadowMQ: same pickle/ZMQ vulnerability as vLLM — code literally copy-pasted. CVE-2025-10164 unsafe deserialization → RCE on GPU servers.',
+    cves: [
+      { id: 'CVE-2025-10164', cvss: 8.0, desc: 'Unsafe deserialization in /update_weights_from_tensor → RCE on GPU servers via pickle' }
+    ],
+    attacks: [
+      { date: '2025', desc: 'ShadowMQ: pickle/ZMQ vulnerability propagated from vLLM via code copy-paste. Thousands of exposed ZMQ sockets on public internet' },
+      { date: '2025', desc: 'KV-Cache Sharing Prompt Leakage (NDSS\'25): RadixAttention shared KV-cache allows cross-tenant prompt extraction in multi-tenant serving' }
+    ],
+    threats: [
+      { actor: 'opportunist', vector: 'Pickle deserialization RCE via ZeroMQ (CVE-2025-10164) + multi-tenant prompt leakage' },
+      { actor: 'supply-chain', vector: 'ShadowMQ demonstrates vulnerability propagation through code reuse between inference engines' }
+    ], shape: 'circle' },
+  { id: 'tgi',           label: 'TGI',              layer: 'serving',   downloads: 1000000,    risk: 68, depRepos: 2000,  maintainers: 'HuggingFace (~15)', since: 2023,
+    blast: 'HuggingFace Text Generation Inference. Rust-based, Docker-delivered. KV-Cache sharing in multi-tenant deployments allows cross-tenant prompt leakage (NDSS\'25).',
+    cves: [],
+    attacks: [
+      { date: '2025', desc: 'KV-Cache Sharing Prompt Leakage (NDSS\'25): shared KV-cache in multi-tenant serving allows cross-tenant prompt extraction' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Docker image supply chain — container-level compromise of official HF inference server' },
+      { actor: 'opportunist', vector: 'Multi-tenant prompt leakage via shared KV-cache + HF model loading attack surface' }
+    ], shape: 'circle' },
+  // ── Enrichment: Agents ──
+  { id: 'ag2',           label: 'AG2',              layer: 'agents',    downloads: 500000,     risk: 72, depRepos: 1000,  maintainers: 'Linux Foundation (~20)', since: 2024,
+    blast: 'AG2 (formerly Microsoft AutoGen). Enterprise multi-agent framework, Azure integration. Main risks: arbitrary code execution via agent code generation, tool calling injection.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'crime', vector: 'Arbitrary code execution via agent code generation in enterprise multi-agent workflows' },
+      { actor: 'opportunist', vector: 'Tool calling injection — hijacking agent tool calls to execute malicious actions' }
+    ], shape: 'circle' },
+  { id: 'browser-use',   label: 'Browser Use',      layer: 'agents',    downloads: 500000,     risk: 78, depRepos: 500,   maintainers: '~10', since: 2024,
+    blast: '50K+ GitHub stars. Browser automation agent. New attack surface: web content = indirect prompt injection → action execution in browser context.',
+    cves: [], attacks: [
+      { date: '2025', desc: 'Cyberhaven Labs: web page content triggers indirect prompt injection — "ChatGPT, navigate to X" redirects agentic browser' }
+    ],
+    threats: [
+      { actor: 'opportunist', vector: 'Indirect prompt injection via web content → browser action execution (new agent attack class)' },
+      { actor: 'crime', vector: 'Credential theft via agentic browser navigating to attacker-controlled pages' }
+    ], shape: 'circle' },
+  // ── Enrichment: Applications ──
+  { id: 'streamlit',     label: 'Streamlit',        layer: 'app',       downloads: 30000000,   risk: 75, depRepos: 15000, maintainers: 'Snowflake (~20)', since: 2020,
+    blast: '30M downloads/mo. ML app builder (Snowflake). Critical pyarrow dependency inherits CVE-2023-47248. Path traversal on Windows, arbitrary file upload bypass → cloud ATO.',
+    cves: [
+      { id: 'CVE-2024-42474', cvss: 5.9, desc: 'Path traversal on Windows via static file sharing → password hash leak' },
+      { id: 'CVE-2025-1684', cvss: 8.8, desc: 'Arbitrary file upload bypass — server-side validation absent → SSH key overwrite → cloud ATO' }
+    ],
+    attacks: [{ date: '2025', desc: 'CVE-2025-1684: st.file_uploader client-side-only type check bypass → arbitrary file upload → cloud account takeover' }],
+    threats: [
+      { actor: 'opportunist', vector: 'File upload bypass → cloud account takeover via SSH key overwrite (CVE-2025-1684)' },
+      { actor: 'supply-chain', vector: 'Critical pyarrow dependency chain — inherits CVE-2023-47248 CVSS 9.8 RCE via .parquet' }
+    ], shape: 'circle' },
+  { id: 'flowise',       label: 'Flowise',          layer: 'app',       downloads: 500000,     risk: 90, depRepos: 1000,  maintainers: '~10', since: 2023,
+    blast: '30K+ GitHub stars. Visual LLM builder. Multiple critical CVEs: CVSS 9.8 unauthenticated ATO, RCE via MCP and Supabase, trivial auth bypass via case sensitivity.',
+    cves: [
+      { id: 'CVE-2025-58434', cvss: 9.8, desc: 'Unauthenticated password reset token disclosure → full account takeover' },
+      { id: 'CVE-2024-31621', cvss: 8.1, desc: 'Authentication bypass via case sensitivity (/API/V1 vs /api/v1) — EPSS 60.74%' },
+      { id: 'CVE-2025-26319', cvss: 8.0, desc: 'Arbitrary file upload via /api/v1/attachments' }
+    ],
+    attacks: [{ date: '2025', desc: 'GHSA-3gcm-f6qx-ff7p: RCE via CustomMCP node. GHSA-7944-7c6r-55vv: RCE via Supabase RPC Filter → execSync()' }],
+    threats: [
+      { actor: 'opportunist', vector: 'Trivial auth bypass (case sensitivity) + unauthenticated ATO (CVE-2025-58434 CVSS 9.8)' },
+      { actor: 'crime', vector: 'RCE via MCP and Supabase integrations in visual LLM workflows' }
+    ], shape: 'circle' },
+  { id: 'chainlit',      label: 'Chainlit',         layer: 'app',       downloads: 1000000,    risk: 55, depRepos: 500,   maintainers: '~10', since: 2023,
+    blast: '~1M downloads/mo. ChatGPT-like UI builder for LLM apps. Integrates with LangChain, LlamaIndex. UI layer for production LLM applications.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'UI layer for LLM apps — compromise exposes all user interactions and API keys' },
+      { actor: 'opportunist', vector: 'XSS or injection in chat UI affecting downstream LLM application users' }
+    ], shape: 'circle' },
+  // ── Enrichment v2: Serving ──
+  { id: 'torchserve',    label: 'TorchServe',       layer: 'serving',   downloads: 2000000,    risk: 85, depRepos: 3000,  maintainers: 'PyTorch/Meta (~15)', since: 2020,
+    blast: 'Official PyTorch model serving. Shelltorch (2023): Management API without auth on 0.0.0.0:8081 by default → trivial RCE. SSRF + SnakeYAML deserialization. Tens of thousands exposed on public internet.',
+    cves: [],
+    attacks: [
+      { date: '2023-10', desc: 'Shelltorch (Oligo Security): Management API without auth exposed on 0.0.0.0:8081. SSRF + SnakeYAML deserialization \u2192 RCE. Tens of thousands of instances exposed' }
+    ],
+    threats: [
+      { actor: 'opportunist', vector: 'Unauthenticated Management API \u2192 load malicious model from arbitrary URL \u2192 RCE on GPU server' },
+      { actor: 'crime', vector: 'Mass exploitation of exposed TorchServe instances \u2014 model theft and data exfiltration' }
+    ], shape: 'circle' },
+  // ── Enrichment v2: Agents/Safety ──
+  { id: 'guardrails-ai', label: 'Guardrails AI',    layer: 'agents',    downloads: 500000,     risk: 72, depRepos: 500,   maintainers: '~15', since: 2023,
+    blast: 'LLM output validation and safety framework. If guardrails compromised \u2192 bypass ALL safety filters. Trust boundary between LLM output and downstream actions.',
+    cves: [],
+    attacks: [
+      { date: '2024-09', desc: 'HiddenLayer: multiple vulnerabilities in validation logic. Arbitrary code execution via custom validator definitions' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Compromised guardrails = bypass of all safety filters between LLM output and downstream actions' },
+      { actor: 'opportunist', vector: 'Arbitrary code execution via custom validator definitions (HiddenLayer report)' }
+    ], shape: 'circle' },
+  // ── Enrichment: Hardware ──
+  { id: 'amd-rocm',      label: 'AMD ROCm',         layer: 'hardware',  downloads: 0,          risk: 70, depRepos: 0,     maintainers: 'AMD', since: 2020,
+    blast: 'AMD ROCm/MI300X — 8% AI training market. CUDA alternative with separate dependency chain. Used in large-scale deployments.',
+    cves: [], attacks: [],
+    threats: [
+      { actor: 'nation-state', vector: 'Alternative hardware stack — separate supply chain risk from NVIDIA/CUDA' },
+      { actor: 'supply-chain', vector: 'ROCm toolkit and driver supply chain — independent from CUDA but same attack patterns' }
+    ], shape: 'hex' },
 ];
 
 // Edges: source DEPENDS ON target (arrow from source → target)
@@ -1557,7 +1869,88 @@ const EDGES = [
   { source: 'litellm',      target: 'cohere-sdk' },   // litellm proxies to Cohere
   { source: 'litellm',      target: 'mistralai-sdk' },// litellm proxies to Mistral
   { source: 'litellm',      target: 'groq-sdk' },     // litellm proxies to Groq
-  { source: 'gigachat-sdk', target: 'hf-hub' },       // GigaChain ecosystem, langchain-gigachat
+  { source: 'gigachat-sdk', target: 'hf-hub' },       // GigaChain ecosystem
+  { source: 'gigachat-sdk', target: 'langchain' },    // langchain-gigachat integration
+  // ── Enrichment: Missing edges for EXISTING nodes ──
+  { source: 'langchain',    target: 'openai-sdk' },   // langchain-openai primary LLM provider
+  { source: 'langchain',    target: 'anthropic-sdk' }, // langchain-anthropic integration
+  { source: 'vllm',         target: 'ray' },           // distributed inference via Ray clusters
+  { source: 'n8n',          target: 'langchain' },     // LangChain integration node in n8n
+  { source: 'dify',         target: 'hf-hub' },        // model loading via HuggingFace Hub
+  { source: 'gradio',       target: 'transformers' },  // canonical transformers.pipeline + gradio.Interface
+  { source: 'scikit-learn', target: 'pandas' },        // common data loading dependency
+  // ── Enrichment: New node edges — protobuf ──
+  { source: 'tensorflow',   target: 'protobuf' },     // TF serialization format
+  { source: 'onnx',         target: 'protobuf' },     // ONNX model format
+  { source: 'vllm',         target: 'protobuf' },     // gRPC/serialization
+  { source: 'triton',       target: 'protobuf' },     // Triton model config
+  // ── opencv-python ──
+  { source: 'opencv-python', target: 'numpy' },       // core numerical dep
+  // ── pyarrow ──
+  { source: 'pyarrow',      target: 'numpy' },        // core numerical dep
+  { source: 'datasets',     target: 'pyarrow' },      // HF datasets uses Arrow format
+  { source: 'pandas',       target: 'pyarrow' },      // Pandas 2.0+ uses pyarrow backend
+  // ── pydantic ──
+  { source: 'fastapi',      target: 'pydantic' },     // FastAPI built on pydantic
+  { source: 'langchain',    target: 'pydantic' },     // LangChain uses pydantic models
+  { source: 'vllm',         target: 'pydantic' },     // vLLM API uses pydantic
+  { source: 'openai-sdk',   target: 'pydantic' },     // OpenAI SDK uses pydantic models
+  // ── jax ──
+  { source: 'jax',          target: 'cuda' },         // GPU backend
+  { source: 'jax',          target: 'numpy' },        // core numerical dep
+  { source: 'jax',          target: 'scipy' },        // optimization algorithms
+  { source: 'jax',          target: 'amd-rocm' },     // ROCm backend
+  // ── xgboost ──
+  { source: 'xgboost',      target: 'numpy' },        // core numerical dep
+  { source: 'xgboost',      target: 'scipy' },        // optimization algorithms
+  { source: 'xgboost',      target: 'mlflow' },       // model tracking/registry
+  // ── ultralytics ──
+  { source: 'ultralytics',  target: 'pytorch' },      // YOLO built on PyTorch
+  { source: 'ultralytics',  target: 'opencv-python' },// image processing
+  { source: 'ultralytics',  target: 'numpy' },        // core numerical dep
+  // ── fastapi (others depend on it) ──
+  { source: 'vllm',         target: 'fastapi' },      // vLLM API server built on FastAPI
+  { source: 'gradio',       target: 'fastapi' },      // Gradio server built on FastAPI
+  { source: 'bentoml',      target: 'fastapi' },      // BentoML HTTP server uses FastAPI
+  { source: 'mlflow',       target: 'fastapi' },      // MLflow model serving
+  { source: 'langflow',     target: 'fastapi' },      // Langflow API built on FastAPI
+  // ── sglang ──
+  { source: 'sglang',       target: 'pytorch' },      // SGLang inference on PyTorch
+  { source: 'sglang',       target: 'cuda' },         // GPU inference
+  { source: 'sglang',       target: 'transformers' }, // model loading
+  // ── tgi ──
+  { source: 'tgi',          target: 'transformers' }, // HF model support
+  { source: 'tgi',          target: 'hf-hub' },       // model loading from Hub
+  { source: 'tgi',          target: 'safetensors' },  // safe model format
+  // ── ag2 ──
+  { source: 'ag2',          target: 'openai-sdk' },   // primary LLM provider
+  { source: 'ag2',          target: 'anthropic-sdk' },// Claude integration
+  { source: 'ag2',          target: 'langchain' },    // agent orchestration
+  // ── browser_use ──
+  { source: 'browser-use',  target: 'openai-sdk' },   // LLM provider
+  { source: 'browser-use',  target: 'anthropic-sdk' },// LLM provider
+  { source: 'browser-use',  target: 'langchain' },    // agent framework
+  // ── streamlit ──
+  { source: 'streamlit',    target: 'pyarrow' },      // critical data dependency
+  { source: 'streamlit',    target: 'numpy' },        // data processing
+  // ── flowise ──
+  { source: 'flowise',      target: 'langchain' },    // workflow builder for LangChain
+  { source: 'flowise',      target: 'openai-sdk' },   // LLM provider
+  { source: 'flowise',      target: 'hf-hub' },       // model loading
+  // ── chainlit ──
+  { source: 'chainlit',     target: 'langchain' },    // agent framework
+  { source: 'chainlit',     target: 'llamaindex' },   // RAG framework
+  { source: 'chainlit',     target: 'openai-sdk' },   // LLM provider
+  // ── amd-rocm ──
+  { source: 'pytorch',      target: 'amd-rocm' },     // ROCm backend for PyTorch
+  { source: 'amd-rocm',     target: 'tsmc' },         // AMD chips manufactured by TSMC
+  // ── Enrichment v2: new edges ──
+  { source: 'llama-cpp',    target: 'hf-hub' },       // GGUF models hosted on HF Hub
+  { source: 'torchserve',   target: 'pytorch' },      // official PyTorch serving
+  { source: 'guardrails-ai', target: 'openai-sdk' },  // LLM provider integration
+  { source: 'guardrails-ai', target: 'langchain' },   // agent framework integration
+  { source: 'guardrails-ai', target: 'anthropic-sdk' },// Claude integration
+  { source: 'hf-hub',       target: 'safetensors' },  // primary safe format on HF Hub
 ];
 
 const INCIDENTS = [
@@ -1589,6 +1982,68 @@ const INCIDENTS = [
     desc: '25+ CVEs disclosed on huntr targeting Open WebUI. Multiple DoS, authentication bypass, and information disclosure vulnerabilities across the most popular self-hosted LLM UI.' },
   { id: 'inc14', date: '2024-11', label: 'LibreChat: 15+ CVEs disclosure wave', nodes: ['librechat'],
     desc: '15+ vulnerability disclosures in a single wave on huntr targeting LibreChat. Path traversal leading to RCE, arbitrary file deletion, and information disclosure across the open-source ChatGPT alternative.' },
+  // ── Enrichment: New incidents ──
+  { id: 'inc15', date: '2024-12', label: 'Ultralytics PyPI Supply Chain Compromise', nodes: ['ultralytics'],
+    desc: 'Versions 8.3.41/42/45/46 compromised via GitHub Actions script injection. XMRig cryptominer in official PyPI release. 60M+ downloads. Attacker @openimbot used malicious branch name for CI/CD code injection. Fix version 8.3.42 was also compromised. First major ML supply chain attack through CI/CD.' },
+  { id: 'inc16', date: '2024-03', label: 'ShadowRay: Mass exploitation of Ray clusters', nodes: ['ray'],
+    desc: 'CVE-2023-48022 (CVSS 9.8) actively exploited. 230K+ Ray servers exposed. Cryptomining (XMRig), data theft, DDoS. ShadowRay 2.0 (Nov 2025): self-propagating botnet with AI-generated payloads by IronErn440. Anyscale considers it a design decision — CVE NOT PATCHED.' },
+  { id: 'inc17', date: '2025-11', label: 'ShadowMQ: Cross-framework pickle RCE propagation', nodes: ['vllm', 'sglang', 'ray'],
+    desc: 'Unsafe pickle deserialization via ZeroMQ propagated through code copy-paste: Meta Llama Stack → vLLM → SGLang → NVIDIA TensorRT-LLM → Modular Max Server. CVE-2025-30165 (vLLM CVSS 8.0), CVE-2025-10164 (SGLang), CVE-2025-23254 (TensorRT-LLM CVSS 8.8). Thousands of exposed ZMQ sockets on public internet.' },
+  { id: 'inc18', date: '2025-01', label: 'Picklescan Bypass: 4 CVEs in HF scanner', nodes: ['hf-hub', 'safetensors'],
+    desc: 'Sonatype disclosure: 4 CVEs bypassing picklescan (HF malicious pickle detector). CVE-2025-1716 (static analysis bypass → ACE), CVE-2025-1889 (hidden files via extension), CVE-2025-1944 (ZIP filename tampering), CVE-2025-1945 (ZIP flag bits). Attackers can bypass malware scanning on HuggingFace Hub.' },
+  { id: 'inc19', date: '2023-11', label: 'PyArrow CVSS 9.8: arbitrary code execution', nodes: ['pyarrow'],
+    desc: 'CVE-2023-47248 (CVSS 9.8, EPSS 87.29%). Deserialization of untrusted data in IPC/Parquet/Feather readers. All versions 0.14.0–14.0.0. Affects Streamlit, Pandas, Spark, HF datasets. One of the most widely exploited ML CVEs.' },
+  { id: 'inc20', date: '2025-05', label: 'Langflow active exploitation: Flodrix botnet', nodes: ['langflow'],
+    desc: 'CVE-2025-3248 actively exploited. Added to CISA KEV 2025-05-05. Flodrix botnet uses RCE for DDoS and data exfiltration. Public PoC on GitHub. Trend Micro confirms active campaign targeting 79K+ GitHub stars project.' },
+  // ── Enrichment v2: new incidents ──
+  { id: 'inc21', date: '2023-12', label: 'HuggingFace API Token Mass Exposure', nodes: ['hf-hub'],
+    desc: 'Lasso Security: 1500+ HuggingFace API tokens found on GitHub. Includes write-access tokens to Meta-Llama, BigScience Bloom, EleutherAI Pythia. Could modify models, inject backdoors into weights, poison training data. Millions of downstream users potentially affected.' },
+  { id: 'inc22', date: '2024-01', label: 'HuggingFace AI Jacking: CI/CD pipeline hijack', nodes: ['hf-hub'],
+    desc: 'Legit Security: vulnerability in HuggingFace CI/CD allowed hijack of popular repos via malicious pull request. Attacker could gain write-access to any HF repo through CI pipeline injection. Tens of thousands of developers potentially impacted.' },
+  { id: 'inc23', date: '2023-10', label: 'Shelltorch: TorchServe mass exposure', nodes: ['torchserve', 'pytorch'],
+    desc: 'Oligo Security: 3 vulnerabilities in TorchServe. Management API without auth on 0.0.0.0:8081 → RCE via model registration from arbitrary URL. SSRF + SnakeYAML deserialization → RCE. Tens of thousands of instances exposed on public internet.' },
+];
+
+const ATTACK_PATTERNS = [
+  { id: 'model-malware',    label: 'Model-as-Malware',           color: '#ff1744',
+    desc: 'Legitimate model format features used as malware delivery. Not a bug — by-design code execution in model formats.',
+    nodes: ['tensorflow', 'pytorch', 'hf-hub', 'safetensors', 'llama-cpp'],
+    papers: ['TensorAbuse (S&P\'25)', 'CVE-2024-3660', 'Confused Learning (BlackHat Asia\'24)'] },
+  { id: 'llm-injection',    label: 'LLM-Mediated Injection',     color: '#ff9100',
+    desc: 'Prompt injection → SQL/OS/code injection via tool calling. LLM bridges untrusted input to privileged system calls.',
+    nodes: ['langchain', 'llamaindex', 'ag2', 'browser-use', 'composio', 'flowise', 'langflow'],
+    papers: ['LLMSmith (CCS\'24)', 'LLM4Shell (BlackHat Asia\'24)', 'Demystifying RCE (CCS\'24)'] },
+  { id: 'pkg-hallucination', label: 'Package Hallucination',      color: '#76ff03',
+    desc: 'LLM code assistants hallucinate package names → attackers register them on PyPI/npm → developers install malware. ~20% of suggested packages are hallucinated.',
+    nodes: ['setuptools'],
+    papers: ['"We Have a Package for You!" (arXiv)', 'Lasso Security: AI Package Hallucinations'] },
+  { id: 'tenant-leakage',   label: 'Multi-Tenant Leakage',       color: '#00e5ff',
+    desc: 'Shared GPU memory and KV-cache in multi-tenant serving allows cross-tenant prompt extraction.',
+    nodes: ['vllm', 'sglang', 'tgi', 'ray'],
+    papers: ['KV-Cache Sharing (NDSS\'25)'] },
+  { id: 'cicd-compromise',  label: 'CI/CD Pipeline Compromise',   color: '#d500f9',
+    desc: 'GitHub Actions / HF Spaces CI → code injection via PR metadata, branch names, workflow triggers.',
+    nodes: ['ultralytics', 'hf-hub'],
+    papers: ['Ultralytics incident (2024-12)', 'HF AI Jacking (Legit Security)'] },
+];
+
+const RESEARCH_REFS = [
+  { category: 'Surveys',     title: 'LLM Supply Chain: A Research Agenda',          venue: 'TOSEM',          url: null },
+  { category: 'Surveys',     title: 'Lifting the Veil on the LLM Supply Chain',     venue: 'arXiv',          url: null },
+  { category: 'Surveys',     title: 'LLM Supply Chain: Open Problems',              venue: 'arXiv',          url: null },
+  { category: 'Model Sec',   title: 'Models Are Codes — Malicious Code Poisoning',  venue: 'ASE\'24',        url: null },
+  { category: 'Model Sec',   title: 'TensorAbuse — Model-as-Malware',               venue: 'S&P\'25',       url: 'https://github.com/ZJU-SEC/TensorAbuse' },
+  { category: 'Model Sec',   title: 'Naming Practices & Typosquatting on HF',       venue: 'arXiv',          url: null },
+  { category: 'Model Sec',   title: 'Empirical Study of PTM Supply Chain',          venue: 'SCORED\'22',     url: null },
+  { category: 'LLM Sec',     title: 'A New Era in LLM Security',                    venue: 'arXiv',          url: null },
+  { category: 'LLM Sec',     title: 'LLMSmith — Systematic RCE Discovery',          venue: 'CCS\'24',       url: 'https://github.com/LLMSmith/LLMSmith' },
+  { category: 'Standards',   title: 'OWASP Top 10 for LLMs',                        venue: 'OWASP',          url: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/' },
+  { category: 'Standards',   title: 'Offensive ML Playbook',                         venue: 'Wiki',           url: 'https://wiki.offsecml.com' },
+  { category: 'Talks',       title: 'Practical LLM Security',                        venue: 'BlackHat USA\'24', url: null },
+  { category: 'Talks',       title: 'Isolation or Hallucination — Hacking AI Infra', venue: 'BlackHat USA\'24', url: null },
+  { category: 'Talks',       title: 'From MLOps to MLOops',                          venue: 'BlackHat USA\'24', url: null },
+  { category: 'Talks',       title: 'Confused Learning — Supply Chain via ML Models', venue: 'BlackHat Asia\'24', url: null },
+  { category: 'Talks',       title: 'Hugging Face to Hug Worms',                     venue: 'BlackHat Asia\'24', url: null },
 ];
 
 // ══════════════════════════════════════════════════
@@ -1619,6 +2074,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildTimeline();
   buildGraph();
   buildAttackRanking();
+  buildResearchLibrary();
 });
 
 // ══════════════════════════════════════════════════
@@ -2401,6 +2857,59 @@ function buildAttackRanking() {
   });
 
   renderYear(years[0], false);
+}
+
+// ══════════════════════════════════════════════════
+// RESEARCH LIBRARY
+// ══════════════════════════════════════════════════
+function buildResearchLibrary() {
+  // Attack Patterns
+  const patternsEl = document.getElementById('patternsContent');
+  patternsEl.innerHTML = ATTACK_PATTERNS.map(p => `
+    <div class="attack-pattern-card" data-nodes='${JSON.stringify(p.nodes)}'>
+      <div class="pattern-title">
+        <span class="pattern-dot" style="background:${p.color}"></span>
+        ${p.label}
+      </div>
+      <div class="pattern-desc">${p.desc}</div>
+      <div class="pattern-nodes">
+        ${p.nodes.map(n => `<span class="pattern-node-tag">${nodeMap[n] ? nodeMap[n].label : n}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // Click handler → highlightNodeGroup
+  patternsEl.querySelectorAll('.attack-pattern-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const nodes = JSON.parse(card.dataset.nodes);
+      highlightNodeGroup(nodes);
+    });
+  });
+
+  // Academic References
+  const refsEl = document.getElementById('refsContent');
+  const grouped = {};
+  RESEARCH_REFS.forEach(r => {
+    if (!grouped[r.category]) grouped[r.category] = [];
+    grouped[r.category].push(r);
+  });
+  refsEl.innerHTML = Object.entries(grouped).map(([cat, refs]) => `
+    <div class="ref-category">
+      <div class="ref-category-title">${cat}</div>
+      ${refs.map(r => `<div class="ref-item">
+        ${r.url ? `<a href="${r.url}" target="_blank" rel="noopener">${r.title}</a>` : r.title}
+        <span class="ref-venue">${r.venue}</span>
+      </div>`).join('')}
+    </div>
+  `).join('');
+}
+
+function toggleResearchSection(section) {
+  const btn = document.getElementById(section + 'Toggle');
+  const content = document.getElementById(section + 'Content');
+  const isOpen = btn.classList.contains('open');
+  btn.classList.toggle('open');
+  content.style.display = isOpen ? 'none' : 'block';
 }
 
 // ══════════════════════════════════════════════════
