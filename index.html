@@ -30,73 +30,76 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   grid-area: header;
   display: flex; flex-direction: column;
   padding: 0;
-  background: linear-gradient(180deg, #0f1520 0%, #0a0e17 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: #0d1219;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   z-index: 10;
 }
 .header-row-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 20px;
-  min-height: 40px;
+  padding: 10px 24px 6px;
 }
 #header h1 {
-  font-size: 15px; font-weight: 600;
-  background: linear-gradient(90deg, #00e5ff, #76ff03);
+  font-size: 17px; font-weight: 700;
+  background: linear-gradient(90deg, #00e5ff 0%, #76ff03 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  letter-spacing: 0.5px; white-space: nowrap; margin: 0;
+  letter-spacing: 0.6px; white-space: nowrap; margin: 0;
 }
-.header-actions { display: flex; align-items: center; gap: 10px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
 .header-row-filters {
-  display: flex; align-items: center; gap: 6px;
-  padding: 0 20px 8px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 24px 10px;
   flex-wrap: wrap;
 }
 .filter-group {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 6px;
 }
 .filter-group-label {
-  font-size: 9px; color: #445; text-transform: uppercase;
-  letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;
-  margin-right: 2px; white-space: nowrap;
+  font-size: 10px; color: #556; text-transform: uppercase;
+  letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;
+  margin-right: 4px; white-space: nowrap;
 }
 .filter-sep {
-  width: 1px; height: 18px; background: rgba(255,255,255,0.08);
-  margin: 0 8px;
+  width: 1px; height: 22px; background: rgba(255,255,255,0.08);
+  margin: 0 10px;
 }
-.layer-filters { display: flex; gap: 4px; flex-wrap: wrap; }
+.layer-filters { display: flex; gap: 5px; flex-wrap: wrap; }
 .layer-chip {
-  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; padding: 4px 12px; border-radius: 12px;
   border: 1px solid; cursor: pointer; transition: all 0.2s;
   font-family: 'Inter', sans-serif; background: transparent; color: #ccc;
-  opacity: 0.6; line-height: 1.4;
+  opacity: 0.55; line-height: 1.3;
 }
 .layer-chip.active { opacity: 1; }
 .layer-chip:hover { opacity: 1; }
 
 /* ── Year Filters ── */
-.year-filters { display: flex; gap: 4px; }
+.year-filters { display: flex; gap: 5px; }
 .year-chip {
-  font-size: 10px; padding: 2px 8px; border-radius: 10px;
-  border: 1px solid rgba(0,229,255,0.25); cursor: pointer; transition: all 0.2s;
+  font-size: 11px; padding: 4px 12px; border-radius: 12px;
+  border: 1px solid rgba(0,229,255,0.2); cursor: pointer; transition: all 0.2s;
   font-family: 'JetBrains Mono', monospace; background: transparent; color: #556;
-  opacity: 0.6; line-height: 1.4;
+  opacity: 0.55; line-height: 1.3;
 }
-.year-chip:hover { opacity: 1; }
-.year-chip.active { opacity: 1; color: #00e5ff; border-color: #00e5ff; background: rgba(0,229,255,0.1); }
+.year-chip:hover { opacity: 1; color: #99b; }
+.year-chip.active {
+  opacity: 1; color: #00e5ff; border-color: #00e5ff;
+  background: rgba(0,229,255,0.08);
+  box-shadow: 0 0 8px rgba(0,229,255,0.15);
+}
 
 /* ── Simulation Button ── */
 .sim-btn {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
-  padding: 4px 12px; border-radius: 4px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  padding: 6px 16px; border-radius: 5px; cursor: pointer;
   border: 1px solid #ff1744; color: #ff1744; background: transparent;
-  transition: all 0.25s; text-transform: uppercase; letter-spacing: 0.8px;
+  transition: all 0.25s; text-transform: uppercase; letter-spacing: 1px;
   white-space: nowrap;
 }
-.sim-btn:hover { background: rgba(255,23,68,0.15); }
+.sim-btn:hover { background: rgba(255,23,68,0.12); }
 .sim-btn.active { background: #ff1744; color: #fff; box-shadow: 0 0 20px rgba(255,23,68,0.4); }
 .sim-reset {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  padding: 4px 10px; border-radius: 4px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  padding: 5px 12px; border-radius: 5px; cursor: pointer;
   border: 1px solid #555; color: #999; background: transparent;
   transition: all 0.2s; display: none; white-space: nowrap;
 }
@@ -454,10 +457,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   position: relative; display: flex; align-items: center;
 }
 .search-input {
-  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
   background: rgba(255,255,255,0.04); color: #e0e0e0;
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
-  padding: 4px 10px 4px 26px; width: 170px; outline: none;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 5px;
+  padding: 6px 12px 6px 30px; width: 190px; outline: none;
   transition: border-color 0.2s, background 0.2s;
 }
 .search-input::placeholder { color: #445; }
@@ -688,7 +691,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
     <div class="research-credit">
       <div class="research-credit-title">Supply Chain Research</div>
       <div class="research-credit-text">
-        Interactive dependency &amp; attack surface map of the ML/AI ecosystem. 49 packages, 128 edges, 14 real-world incidents. Data as of Q1 2026.<br>
+        Interactive dependency &amp; attack surface map of the ML/AI ecosystem. 56 packages, 128 edges, 14 real-world incidents. Data as of Q1 2026.<br>
         Built by <a href="https://t.me/pwnai" target="_blank" rel="noopener">@pwnai</a>
       </div>
       <div style="margin-top:6px;">
@@ -1319,6 +1322,70 @@ const NODES = [
       { actor: 'opportunist', vector: 'Auth bypass + unsafe eval chain \u2192 full compromise of agent tooling platform (CVE-2024-8954 CVSS 9.1)' },
       { actor: 'crime', vector: 'Unauthorized access to all connected service credentials via agent tooling' }
     ], shape: 'circle' },
+  // ── LLM Provider SDKs ──
+  { id: 'openai-sdk',     label: 'OpenAI SDK',       layer: 'serving',   downloads: 125000000,  risk: 85, depRepos: 50000, maintainers: 'OpenAI (~10)', since: 2020,
+    blast: '125M downloads/mo. Core Python SDK for GPT-4, o1, DALL-E, Whisper. Used by nearly every LLM application directly or transitively. Compromise exposes all API keys and allows MITM on model responses.',
+    cves: [],
+    attacks: [
+      { date: '2024', desc: 'CVE-2024-27564: SSRF in ChatGPT infrastructure actively exploited — 10K+ attack attempts from single IP, 35% of organizations unprotected' },
+      { date: '2025', desc: 'CVE-2025-61260: Codex CLI arbitrary command execution via project config — implicitly trusted local configs' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Compromised release would affect 125M monthly installs — largest LLM SDK attack surface' },
+      { actor: 'crime', vector: 'API key harvesting from leaked environment variables and logs' }
+    ], shape: 'circle' },
+  { id: 'anthropic-sdk',  label: 'Anthropic SDK',    layer: 'serving',   downloads: 44000000,   risk: 72, depRepos: 15000, maintainers: 'Anthropic (~10)', since: 2023,
+    blast: '44M downloads/mo. SDK for Claude models. MCP ecosystem has critical CVEs (Inspector RCE CVSS 9.4, mcp-remote RCE CVSS 9.6). Compromise exposes Claude API keys.',
+    cves: [],
+    attacks: [
+      { date: '2025', desc: 'CVE-2025-49596: Critical RCE in MCP Inspector (CVSS 9.4) — browser-based exploit via DNS rebinding + CSRF' },
+      { date: '2025', desc: 'CVE-2025-52882: WebSocket auth bypass in Claude Code extensions (CVSS 8.8)' },
+      { date: '2025', desc: 'CVE-2025-53109/53110: Filesystem MCP Server sandbox escapes — symlink bypass + directory containment bypass' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Compromised SDK would expose all Claude API keys across 44M monthly installs' },
+      { actor: 'opportunist', vector: 'MCP ecosystem attack surface — Inspector, filesystem server, SQLite server all had critical CVEs' }
+    ], shape: 'circle' },
+  { id: 'google-genai',   label: 'Google GenAI',     layer: 'serving',   downloads: 238000000,  risk: 78, depRepos: 20000, maintainers: 'Google (~15)', since: 2024,
+    blast: '238M downloads/mo — highest download count of any LLM SDK. Unified SDK for Gemini, Vertex AI, Imagen, Veo. Replaced deprecated google-generativeai. Compromise would be catastrophic.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: '238M monthly downloads — single largest LLM SDK target. PyPI typosquatting campaigns have targeted Google AI packages' },
+      { actor: 'crime', vector: 'Credential harvesting for Google Cloud / Vertex AI service accounts' }
+    ], shape: 'circle' },
+  { id: 'mistralai-sdk',  label: 'Mistral SDK',      layer: 'serving',   downloads: 5700000,    risk: 50, depRepos: 3000,  maintainers: 'Mistral AI (~10)', since: 2024,
+    blast: '5.7M downloads/mo. Python SDK for Mistral AI models. European AI leader. Auto-generated SDK — manual changes overwritten on regeneration.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Auto-generated SDK code — compromise of generation pipeline affects all releases' },
+      { actor: 'crime', vector: 'API key extraction from Mistral-powered applications' }
+    ], shape: 'circle' },
+  { id: 'cohere-sdk',     label: 'Cohere SDK',       layer: 'serving',   downloads: 7500000,    risk: 50, depRepos: 2000,  maintainers: 'Cohere (~10)', since: 2023,
+    blast: '7.5M downloads/mo. Enterprise AI SDK supporting Cohere platform, AWS Bedrock, Azure, GCP, and Oracle OCI.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Multi-cloud SDK — compromise exposes credentials for AWS, Azure, GCP, OCI simultaneously' },
+      { actor: 'crime', vector: 'Enterprise API key harvesting from cloud deployments' }
+    ], shape: 'circle' },
+  { id: 'gigachat-sdk',   label: 'GigaChat SDK',     layer: 'serving',   downloads: 54000,      risk: 45, depRepos: 200,   maintainers: 'Sber AI (~5)', since: 2023,
+    blast: '54K downloads/mo. Sber GigaChat REST API SDK. Uses Russian Ministry of Digital Development certificate chain. Part of GigaChain ecosystem with langchain-gigachat.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Custom certificate chain from Russian Ministry — additional trust surface beyond standard CAs' },
+      { actor: 'nation-state', vector: 'Government-issued certificates create unique supply chain risk for non-Russian users' }
+    ], shape: 'circle' },
+  { id: 'groq-sdk',       label: 'Groq SDK',         layer: 'serving',   downloads: 1900000,    risk: 48, depRepos: 1000,  maintainers: 'Groq (~10)', since: 2024,
+    blast: '1.9M downloads/mo. SDK for Groq ultra-fast LPU inference. Growing rapidly as fastest inference provider.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Fast-growing SDK — rapidly increasing attack surface as Groq adoption grows' },
+      { actor: 'crime', vector: 'API key theft targeting high-performance inference endpoints' }
+    ], shape: 'circle' },
 ];
 
 // Edges: source DEPENDS ON target (arrow from source → target)
@@ -1342,7 +1409,7 @@ const EDGES = [
   { source: 'transformers', target: 'tokenizers' },
   { source: 'transformers', target: 'safetensors' },
   { source: 'tokenizers',   target: 'hf-hub' },
-  { source: 'safetensors',  target: 'hf-hub' },
+  // safetensors is standalone (zero Python deps), no edge to hf-hub
   { source: 'datasets',     target: 'hf-hub' },
   { source: 'accelerate',   target: 'pytorch' },
   { source: 'accelerate',   target: 'hf-hub' },
@@ -1371,10 +1438,8 @@ const EDGES = [
   // Hardware chain
   { source: 'cuda',         target: 'tsmc' },
   { source: 'tsmc',         target: 'asml' },
-  // LangChain
-  { source: 'langchain',    target: 'transformers' },
-  { source: 'langchain',    target: 'pytorch' },
-  { source: 'langchain',    target: 'hf-hub' },
+  // LangChain (LLM-agnostic: no hard deps on transformers/pytorch)
+  { source: 'langchain',    target: 'hf-hub' },  // via optional langchain-huggingface
   // scipy → pandas
   { source: 'pandas',       target: 'scipy' },
   // scikit-learn
@@ -1417,13 +1482,10 @@ const EDGES = [
   { source: 'langflow',     target: 'langchain' },
   { source: 'langflow',     target: 'transformers' },
   { source: 'langflow',     target: 'hf-hub' },
-  // Dify
-  { source: 'dify',         target: 'langchain' },
-  { source: 'dify',         target: 'transformers' },
-  { source: 'dify',         target: 'hf-hub' },
-  // Gradio
-  { source: 'gradio',       target: 'transformers' },
-  { source: 'gradio',       target: 'pytorch' },
+  // Dify (removed LangChain from codebase; uses own framework + LiteLLM)
+  { source: 'dify',         target: 'litellm' },
+  { source: 'dify',         target: 'ollama' },
+  // Gradio (UI framework; no hard dep on transformers/pytorch)
   { source: 'gradio',       target: 'hf-hub' },
   { source: 'gradio',       target: 'numpy' },
   { source: 'gradio',       target: 'pillow' },
@@ -1441,26 +1503,21 @@ const EDGES = [
   { source: 'llamaindex',   target: 'transformers' },
   { source: 'llamaindex',   target: 'hf-hub' },
   { source: 'llamaindex',   target: 'pytorch' },
-  // CrewAI
-  { source: 'crewai',       target: 'langchain' },
-  { source: 'crewai',       target: 'transformers' },
-  { source: 'crewai',       target: 'hf-hub' },
-  // AutoGPT
+  // CrewAI (independent since v0.175+, uses LiteLLM for multi-provider LLM)
+  { source: 'crewai',       target: 'litellm' },
+  // AutoGPT (API-based, no pytorch; historical langchain integration)
   { source: 'autogpt',      target: 'langchain' },
-  { source: 'autogpt',      target: 'pytorch' },
-  // n8n
-  { source: 'n8n',          target: 'langchain' },
-  { source: 'n8n',          target: 'hf-hub' },
+  // n8n (Node.js app; connects to Python services via API)
+  { source: 'n8n',          target: 'ollama' },  // n8n Ollama integration node
   // Haystack
   { source: 'haystack',     target: 'transformers' },
   { source: 'haystack',     target: 'hf-hub' },
   { source: 'haystack',     target: 'pytorch' },
-  // MetaGPT
-  { source: 'metagpt',      target: 'pytorch' },
-  { source: 'metagpt',      target: 'transformers' },
-  // LiteLLM
-  { source: 'litellm',      target: 'transformers' },
-  { source: 'litellm',      target: 'hf-hub' },
+  // MetaGPT (API-based; optional transformers via extras)
+  { source: 'metagpt',      target: 'transformers' },  // optional extra
+  // LiteLLM (API proxy; uses tokenizers for token counting, not full transformers)
+  { source: 'litellm',      target: 'tokenizers' },
+  { source: 'litellm',      target: 'hf-hub' },  // transitive via tokenizers
   // BentoML
   { source: 'bentoml',      target: 'pytorch' },
   { source: 'bentoml',      target: 'transformers' },
@@ -1485,10 +1542,22 @@ const EDGES = [
   { source: 'open-webui',   target: 'ollama' },
   { source: 'open-webui',   target: 'hf-hub' },
   { source: 'open-webui',   target: 'langchain' },
-  // Composio
-  { source: 'composio',     target: 'langchain' },
-  { source: 'composio',     target: 'transformers' },
-  { source: 'composio',     target: 'hf-hub' },
+  // Composio (core has no langchain/transformers dep; optional integrations only)
+  { source: 'composio',     target: 'hf-hub' },  // optional integration
+  // LLM Provider SDKs (standalone HTTP clients — other packages depend ON them)
+  { source: 'litellm',      target: 'openai-sdk' },   // litellm uses openai SDK as core dep
+  { source: 'crewai',       target: 'openai-sdk' },   // crewai uses openai as default provider
+  { source: 'autogpt',      target: 'openai-sdk' },   // AutoGPT uses openai SDK
+  { source: 'metagpt',      target: 'openai-sdk' },   // MetaGPT uses openai SDK
+  { source: 'dify',         target: 'openai-sdk' },   // Dify supports OpenAI-compatible APIs
+  { source: 'haystack',     target: 'openai-sdk' },   // Haystack has openai integration
+  { source: 'langflow',     target: 'openai-sdk' },   // via langchain-openai
+  { source: 'llamaindex',   target: 'openai-sdk' },   // LlamaIndex uses openai as default LLM
+  { source: 'litellm',      target: 'anthropic-sdk' }, // litellm proxies to Anthropic
+  { source: 'litellm',      target: 'cohere-sdk' },   // litellm proxies to Cohere
+  { source: 'litellm',      target: 'mistralai-sdk' },// litellm proxies to Mistral
+  { source: 'litellm',      target: 'groq-sdk' },     // litellm proxies to Groq
+  { source: 'gigachat-sdk', target: 'hf-hub' },       // GigaChain ecosystem, langchain-gigachat
 ];
 
 const INCIDENTS = [
@@ -2285,7 +2354,7 @@ function buildAttackRanking() {
     return counts;
   }
 
-  function renderYear(year) {
+  function renderYear(year, autoHighlight) {
     const counts = getNodeCounts(year);
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
@@ -2293,6 +2362,8 @@ function buildAttackRanking() {
       listContainer.innerHTML = '<div style="font-size:11px;color:#445;padding:8px;">No data for this year</div>';
       return;
     }
+
+    const nodeIds = sorted.map(([nid]) => nid);
 
     listContainer.innerHTML = sorted.map(([nodeId, count], i) => {
       const node = nodeMap[nodeId];
@@ -2310,6 +2381,11 @@ function buildAttackRanking() {
         if (typeof focusNodeById === 'function') focusNodeById(nodeId);
       });
     });
+
+    // Highlight all ranked nodes on the map
+    if (autoHighlight && typeof highlightNodeGroup === 'function') {
+      highlightNodeGroup(nodeIds);
+    }
   }
 
   years.forEach((year, i) => {
@@ -2319,12 +2395,12 @@ function buildAttackRanking() {
     tab.onclick = () => {
       tabsContainer.querySelectorAll('.attack-ranking-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      renderYear(year);
+      renderYear(year, true);
     };
     tabsContainer.appendChild(tab);
   });
 
-  renderYear(years[0]);
+  renderYear(years[0], false);
 }
 
 // ══════════════════════════════════════════════════
@@ -2398,6 +2474,84 @@ function focusNodeById(nodeId) {
     setTimeout(() => g.selectAll('.focus-ring').remove(), 5000);
 
     showNodeDetail(targetData);
+  }, 750);
+}
+
+// Highlight multiple nodes at once (for attack ranking year tab)
+function highlightNodeGroup(nodeIds) {
+  if (!nodeIds || nodeIds.length === 0) return;
+  const idSet = new Set(nodeIds);
+
+  // Collect all neighbors for all target nodes
+  const allRelated = new Set(nodeIds);
+  nodeIds.forEach(nid => {
+    (adjForward[nid] || []).forEach(n => allRelated.add(n));
+    (adjReverse[nid] || []).forEach(n => allRelated.add(n));
+  });
+
+  // Ensure all layers are visible
+  nodeIds.forEach(nid => {
+    const nd = nodeMap[nid];
+    if (nd && !activeFilters.has(nd.layer)) {
+      activeFilters.add(nd.layer);
+      const chip = document.querySelector(`.layer-chip[data-layer="${nd.layer}"]`);
+      if (chip) chip.classList.add('active');
+    }
+  });
+
+  // Clear year filter if any target is hidden
+  if (activeYearFilter !== null) {
+    const anyHidden = nodeIds.some(nid => nodeMap[nid] && nodeMap[nid].since > activeYearFilter);
+    if (anyHidden) {
+      activeYearFilter = null;
+      document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+      const allChip = document.querySelector('.year-chip[data-year="all"]');
+      if (allChip) allChip.classList.add('active');
+    }
+  }
+  updateVisibility();
+
+  // Zoom to fit all target nodes
+  const targets = nodeIds.map(nid => { let d = null; nodeGroup.each(function(n) { if (n.id === nid) d = n; }); return d; }).filter(Boolean);
+  if (targets.length === 0) return;
+
+  const xs = targets.map(d => d.x);
+  const ys = targets.map(d => d.y);
+  const minX = Math.min(...xs) - 60, maxX = Math.max(...xs) + 60;
+  const minY = Math.min(...ys) - 60, maxY = Math.max(...ys) + 60;
+  const container = document.getElementById('main');
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+  const scale = Math.min(W / (maxX - minX), H / (maxY - minY), 2.0);
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const tx = W / 2 - cx * scale;
+  const ty = H / 2 - cy * scale;
+  const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+  svg.transition().duration(700).ease(d3.easeCubicInOut).call(graphZoom.transform, transform);
+
+  setTimeout(() => {
+    // Dim non-related, highlight related
+    nodeGroup.classed('dimmed', n => !allRelated.has(n.id));
+    nodeGroup.classed('highlighted', n => idSet.has(n.id));
+    linkGroup.classed('dimmed', e => {
+      const sid = e.source.id || e.source;
+      const tid = e.target.id || e.target;
+      return !(idSet.has(sid) || idSet.has(tid));
+    });
+
+    // Focus rings on all targets
+    g.selectAll('.focus-ring').remove();
+    targets.forEach(d => {
+      const layerColor = LAYERS[d.layer].color;
+      g.append('circle')
+        .attr('class', 'focus-ring')
+        .attr('cx', d.x).attr('cy', d.y)
+        .attr('r', d.r + 8)
+        .attr('stroke', layerColor);
+    });
+
+    setTimeout(() => g.selectAll('.focus-ring').remove(), 8000);
   }, 750);
 }
 
@@ -2532,12 +2686,15 @@ function focusNodeById(nodeId) {
 
   clearBtn.addEventListener('click', () => { clearSearch(); input.focus(); });
 
-  // Global "/" shortcut to focus search
-  document.addEventListener('keydown', (e) => {a
-    if (e.key === '/' && document.activeElement !== input && document.activeElement.tagName !== 'INPUT') {
+  // Global "/" shortcut to focus search (works in any keyboard layout)
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === '/' || e.code === 'Slash') && !e.ctrlKey && !e.altKey && !e.metaKey
+        && document.activeElement !== input
+        && document.activeElement.tagName !== 'INPUT'
+        && document.activeElement.tagName !== 'TEXTAREA') {
       e.preventDefault();
-      input.focus();
-      input.select();
+      e.stopPropagation();
+      setTimeout(() => { input.focus(); input.select(); }, 0);
     }
   });
 })();
