@@ -736,6 +736,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
         <span>HuggingFace Ecosystem</span>
       </div>
       <div class="legend-row">
+        <div class="legend-dot" style="border-color:#18ffff; background:rgba(24,255,255,0.15);"></div>
+        <span>Vector Databases</span>
+      </div>
+      <div class="legend-row">
         <div class="legend-dot" style="border-color:#76ff03; background:rgba(118,255,3,0.15);"></div>
         <span>Serving &amp; Inference</span>
       </div>
@@ -774,7 +778,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
     <div class="research-credit">
       <div class="research-credit-title">Supply Chain Research</div>
       <div class="research-credit-text">
-        Interactive dependency &amp; attack surface map of the ML/AI ecosystem. 75 packages, 190 edges, 23 real-world incidents. Data as of Q1 2026.<br>
+        Interactive dependency &amp; attack surface map of the ML/AI ecosystem. 95+ packages, 260+ edges, 29 real-world incidents. Data as of Q1 2026.<br>
         Built by <a href="https://t.me/pwnai" target="_blank" rel="noopener">@pwnai</a>
       </div>
       <div style="margin-top:6px;">
@@ -789,11 +793,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
     <div class="sidebar-section-title">Research Library</div>
     <div class="research-library">
       <button class="research-collapse-btn open" id="patternsToggle" onclick="toggleResearchSection('patterns')">
-        <span class="arrow">&#9654;</span> Attack Patterns (5)
+        <span class="arrow">&#9654;</span> Attack Patterns (7)
       </button>
       <div id="patternsContent"></div>
       <button class="research-collapse-btn" id="refsToggle" onclick="toggleResearchSection('refs')">
-        <span class="arrow">&#9654;</span> Academic References (16)
+        <span class="arrow">&#9654;</span> Academic References (22)
       </button>
       <div id="refsContent" style="display:none;"></div>
     </div>
@@ -883,6 +887,7 @@ const LAYERS = {
   base:      { name: 'Base Libraries',        color: '#ff9100', order: 1 },
   framework: { name: 'ML Frameworks',         color: '#ffea00', order: 2 },
   hf:        { name: 'HuggingFace Ecosystem', color: '#00e5ff', order: 3 },
+  vectordb:  { name: 'Vector Databases',      color: '#18ffff', order: 3.5 },
   serving:   { name: 'Serving',               color: '#76ff03', order: 4 },
   agents:    { name: 'AI Agents',             color: '#ff6d00', order: 5 },
   app:       { name: 'Applications',          color: '#d500f9', order: 6 },
@@ -1698,6 +1703,219 @@ const NODES = [
       { actor: 'nation-state', vector: 'Alternative hardware stack — separate supply chain risk from NVIDIA/CUDA' },
       { actor: 'supply-chain', vector: 'ROCm toolkit and driver supply chain — independent from CUDA but same attack patterns' }
     ], shape: 'hex' },
+  // ── Enrichment: Vector Databases ──
+  { id: 'chromadb', label: 'ChromaDB', layer: 'vectordb', downloads: 4000000, risk: 78, depRepos: 3000, maintainers: 'Chroma Inc (~15)', since: 2023,
+    blast: '4M downloads/mo. Embedded vector DB for RAG. CVE-2024-6834 path traversal. Many instances run without authentication.',
+    cves: [
+      { id: 'CVE-2024-6834', cvss: 7.5, desc: 'Path traversal — arbitrary file read via crafted collection names' }
+    ],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Path traversal on unauthenticated ChromaDB instances used in RAG pipelines' },
+      { actor: 'crime', vector: 'Data exfiltration from RAG knowledge bases containing confidential documents' }
+    ], shape: 'circle' },
+  { id: 'milvus', label: 'Milvus', layer: 'vectordb', downloads: 2000000, risk: 80, depRepos: 2000, maintainers: 'Zilliz (~30)', since: 2023,
+    blast: '2M downloads/mo. Production vector DB (Zilliz). CVE-2024-45750 RCE, CVE-2024-37035. Used in enterprise RAG deployments.',
+    cves: [
+      { id: 'CVE-2024-45750', cvss: 9.0, desc: 'Remote code execution via crafted search request' },
+      { id: 'CVE-2024-37035', cvss: 7.5, desc: 'Authentication bypass — unauthorized access to vector collections' }
+    ],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'RCE via crafted search request (CVE-2024-45750 CVSS 9.0)' },
+      { actor: 'crime', vector: 'Unauthorized access to enterprise vector stores containing proprietary embeddings' }
+    ], shape: 'circle' },
+  { id: 'qdrant', label: 'Qdrant', layer: 'vectordb', downloads: 7000000, risk: 72, depRepos: 2000, maintainers: 'Qdrant (~20)', since: 2023,
+    blast: '7M downloads/mo. Rust vector DB. API without authentication by default. Growing rapidly in production RAG deployments.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Default no-auth API — any exposed instance allows full read/write to vector collections' },
+      { actor: 'crime', vector: 'Mass scanning for exposed Qdrant instances to extract RAG knowledge bases' }
+    ], shape: 'circle' },
+  { id: 'weaviate', label: 'Weaviate', layer: 'vectordb', downloads: 1500000, risk: 68, depRepos: 1000, maintainers: 'Weaviate (~30)', since: 2023,
+    blast: '1.5M downloads/mo. Vector DB with SSRF and auth bypass history. Multi-modal search engine.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'SSRF and authentication bypass in multi-tenant vector search deployments' },
+      { actor: 'supply-chain', vector: 'Compromised module integrations in Weaviate plugin ecosystem' }
+    ], shape: 'circle' },
+  { id: 'faiss', label: 'FAISS', layer: 'vectordb', downloads: 40000000, risk: 75, depRepos: 5000, maintainers: 'Meta AI (~10)', since: 2020,
+    blast: '40M downloads/mo. Meta similarity search. Pickle deserialization for index files — faiss.read_index() on untrusted files = RCE.',
+    cves: [],
+    attacks: [
+      { date: '2025', desc: 'faiss.read_index() uses pickle deserialization — RCE via crafted .faiss index files' }
+    ],
+    threats: [
+      { actor: 'opportunist', vector: 'Pickle deserialization RCE via untrusted .faiss index files (faiss.read_index)' },
+      { actor: 'supply-chain', vector: 'Trojanized FAISS indexes distributed via model hubs and shared datasets' }
+    ], shape: 'circle' },
+  { id: 'pgvector', label: 'pgvector', layer: 'vectordb', downloads: 5000000, risk: 60, depRepos: 3000, maintainers: 'Andrew Kane + community (~5)', since: 2023,
+    blast: '5M downloads/mo. PostgreSQL vector extension. Inherits entire PostgreSQL attack surface + SQL injection in vector queries.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'SQL injection via unsanitized vector search queries — inherits full PostgreSQL attack surface' },
+      { actor: 'insider', vector: 'Small maintainer team (~5) for widely deployed PostgreSQL extension' }
+    ], shape: 'circle' },
+  // ── Enrichment: MCP Ecosystem ──
+  { id: 'mcp-sdk', label: 'MCP SDK', layer: 'agents', downloads: 500000, risk: 85, depRepos: 1000, maintainers: 'Anthropic (~10)', since: 2024,
+    blast: 'Model Context Protocol SDK. CVE-2025-6514 mcp-remote RCE (CVSS 9.6, 437K downloads). CVE-2025-49596 Inspector DNS rebinding (CVSS 9.4). Foundation for all MCP tool integrations.',
+    cves: [
+      { id: 'CVE-2025-6514', cvss: 9.6, desc: 'mcp-remote: RCE via malicious MCP server response — arbitrary code execution on client (437K downloads)' },
+      { id: 'CVE-2025-49596', cvss: 9.4, desc: 'MCP Inspector: browser-based RCE via DNS rebinding + CSRF' },
+      { id: 'CVE-2025-53109', cvss: 8.0, desc: 'Filesystem MCP Server: symlink sandbox escape — access files outside allowed directories' },
+      { id: 'CVE-2025-53110', cvss: 7.5, desc: 'Filesystem MCP Server: directory containment bypass' }
+    ],
+    attacks: [
+      { date: '2025-04', desc: 'Invariant Labs: MCP tool poisoning via hidden instructions in tool descriptions. 43% of MCP implementations had command injection. WhatsApp histories, SSH keys, GitHub repos exfiltrated' },
+      { date: '2025', desc: 'CVE-2025-52882: WebSocket auth bypass in Claude Code extensions (CVSS 8.8)' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious MCP servers — tool descriptions contain hidden prompt injection payloads' },
+      { actor: 'opportunist', vector: 'mcp-remote RCE (CVE-2025-6514 CVSS 9.6) + Inspector DNS rebinding (CVE-2025-49596 CVSS 9.4)' }
+    ], shape: 'circle' },
+  // ── Enrichment: Serving / Inference ──
+  { id: 'tensorrt-llm', label: 'TensorRT-LLM', layer: 'serving', downloads: 3000000, risk: 82, depRepos: 2000, maintainers: 'NVIDIA (~20)', since: 2023,
+    blast: 'NVIDIA LLM inference optimization. ShadowMQ: CVE-2025-23254 (CVSS 8.8) pickle/ZMQ vulnerability propagated from vLLM via code copy-paste.',
+    cves: [
+      { id: 'CVE-2025-23254', cvss: 8.8, desc: 'Unsafe pickle deserialization via ZeroMQ — RCE on inference servers (ShadowMQ propagation)' }
+    ],
+    attacks: [
+      { date: '2025', desc: 'ShadowMQ: pickle/ZMQ vulnerability propagated from vLLM via code copy-paste to TensorRT-LLM' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'ShadowMQ demonstrates vulnerability propagation through code reuse between NVIDIA inference engines' },
+      { actor: 'opportunist', vector: 'Pickle deserialization RCE via ZeroMQ (CVE-2025-23254 CVSS 8.8)' }
+    ], shape: 'circle' },
+  { id: 'localai', label: 'LocalAI', layer: 'serving', downloads: 500000, risk: 78, depRepos: 1000, maintainers: '~10', since: 2023,
+    blast: '25K+ GitHub stars. Local inference server. Affected by CVE-2024-34359 (GGUF Jinja2 template injection). Drop-in OpenAI API replacement.',
+    cves: [],
+    attacks: [
+      { date: '2024', desc: 'Affected by CVE-2024-34359: GGUF metadata Jinja2 template injection → RCE via crafted model files' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'GGUF models with Jinja2 payload in metadata — RCE on local inference (CVE-2024-34359 propagation)' },
+      { actor: 'opportunist', vector: 'Drop-in OpenAI API replacement often deployed without additional security hardening' }
+    ], shape: 'circle' },
+  { id: 'gpt4all', label: 'GPT4All', layer: 'serving', downloads: 500000, risk: 72, depRepos: 1000, maintainers: 'Nomic AI (~15)', since: 2023,
+    blast: '70K+ GitHub stars. Desktop LLM client. Affected by llama.cpp GGUF CVEs. Targets non-technical users with minimal security awareness.',
+    cves: [],
+    attacks: [
+      { date: '2024', desc: 'Inherits all llama.cpp GGUF parser vulnerabilities — heap overflow, path traversal, Jinja2 injection' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious GGUF models targeting non-technical desktop users via model download UI' },
+      { actor: 'opportunist', vector: 'Inherited llama.cpp CVEs in GGUF parser (CVE-2024-42479, CVE-2024-34359)' }
+    ], shape: 'circle' },
+  { id: 'triton-server', label: 'Triton Server', layer: 'serving', downloads: 2000000, risk: 78, depRepos: 3000, maintainers: 'NVIDIA (~20)', since: 2020,
+    blast: 'NVIDIA Triton Inference Server (distinct from OpenAI Triton compiler). Docker-delivered. Custom backend loading — arbitrary shared library execution by design.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Custom model backends (.so/.dll) loaded at runtime — arbitrary native code execution by design' },
+      { actor: 'crime', vector: 'Name confusion with OpenAI Triton compiler — typosquatting and misdirection attacks' }
+    ], shape: 'circle' },
+  // ── Enrichment: Base Libraries ──
+  { id: 'tiktoken', label: 'tiktoken', layer: 'base', downloads: 130000000, risk: 55, depRepos: 20000, maintainers: 'OpenAI (~5)', since: 2023,
+    blast: '130M downloads/mo. OpenAI BPE tokenizer (Rust core). Used by OpenAI SDK, LangChain, LiteLLM, LlamaIndex for token counting.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: '130M downloads — compromised release would affect all OpenAI-integrated applications' },
+      { actor: 'insider', vector: 'Small maintainer team (~5) for widely deployed tokenizer' }
+    ], shape: 'circle' },
+  { id: 'h5py', label: 'h5py', layer: 'base', downloads: 50000000, risk: 65, depRepos: 15000, maintainers: '~10', since: 2020,
+    blast: '50M downloads/mo. HDF5 Python bindings. Keras .h5 models = h5py + pickle. C extension with historical buffer overflow CVEs.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Foundation for Keras .h5 model format — compromise propagates to all legacy Keras model loading' },
+      { actor: 'opportunist', vector: 'C extension with historical buffer overflow patterns in HDF5 parsing' }
+    ], shape: 'circle' },
+  { id: 'cloudpickle', label: 'cloudpickle', layer: 'base', downloads: 40000000, risk: 80, depRepos: 10000, maintainers: '~5', since: 2020,
+    blast: '40M downloads/mo. Extended pickle used by Ray, Dask, Spark, MLflow for serialization. Extended pickle = extended RCE surface.',
+    cves: [],
+    attacks: [
+      { date: '2025', desc: 'cloudpickle extends pickle with cross-process serialization — all pickle RCE vectors apply with broader scope' }
+    ],
+    threats: [
+      { actor: 'supply-chain', vector: 'Core serialization library for Ray/Dask/Spark — compromise = RCE across all distributed compute' },
+      { actor: 'insider', vector: 'Only ~5 maintainers for 40M monthly downloads of extended pickle' }
+    ], shape: 'circle' },
+  { id: 'sentencepiece', label: 'sentencepiece', layer: 'base', downloads: 30000000, risk: 60, depRepos: 5000, maintainers: 'Google (~5)', since: 2020,
+    blast: '30M downloads/mo. Google tokenizer (C++ native). Used by T5, LLaMA, Gemma. C++ native code = buffer overflow risk on crafted .model files.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'C++ native code — buffer overflow potential via crafted .model tokenizer files' },
+      { actor: 'supply-chain', vector: 'Compromised tokenizer model files could inject subtle data corruption into NLP pipelines' }
+    ], shape: 'circle' },
+  // ── Enrichment: ML Frameworks ──
+  { id: 'sentence-transformers', label: 'sentence-transformers', layer: 'framework', downloads: 30000000, risk: 65, depRepos: 8000, maintainers: 'UKP Lab (~10)', since: 2020,
+    blast: '30M downloads/mo. Embedding models for semantic search and RAG. Depends on transformers + HF Hub. Models loaded via trust_remote_code.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious embedding models on HF Hub — trust_remote_code in sentence-transformers model loading' },
+      { actor: 'crime', vector: 'Backdoored embedding models producing biased similarity scores in RAG pipelines' }
+    ], shape: 'circle' },
+  { id: 'lightgbm', label: 'LightGBM', layer: 'framework', downloads: 15000000, risk: 68, depRepos: 6000, maintainers: 'Microsoft (~15)', since: 2020,
+    blast: '15M downloads/mo. Microsoft gradient boosting. Pickle model serialization → RCE. Used in fintech, banking, healthcare alongside XGBoost.',
+    cves: [
+      { id: 'CVE-2024-37056', cvss: 8.5, desc: 'Deserialization of untrusted LightGBM models via MLflow → arbitrary code execution' }
+    ],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Pickle model deserialization → RCE in production ML systems (same vector as XGBoost)' },
+      { actor: 'supply-chain', vector: 'Trojanized LightGBM models distributed via MLflow/model registries' }
+    ], shape: 'circle' },
+  { id: 'timm', label: 'timm', layer: 'framework', downloads: 10000000, risk: 62, depRepos: 4000, maintainers: 'Ross Wightman (~3)', since: 2020,
+    blast: '10M downloads/mo. PyTorch Image Models — 1200+ pretrained models. Single primary maintainer for 10M monthly downloads.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'insider', vector: 'Single primary maintainer for 1200+ pretrained vision models and 10M monthly downloads' },
+      { actor: 'supply-chain', vector: 'Trojanized pretrained vision models (1200+ available) on HF Hub' }
+    ], shape: 'circle' },
+  { id: 'spacy', label: 'spaCy', layer: 'framework', downloads: 10000000, risk: 62, depRepos: 5000, maintainers: 'Explosion (~15)', since: 2020,
+    blast: '10M downloads/mo. NLP pipeline with custom model loading and arbitrary Python component execution.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Custom pipeline components execute arbitrary Python — malicious spaCy models = RCE' },
+      { actor: 'opportunist', vector: 'Model package installation via pip runs setup.py hooks — same as PyPI supply chain vector' }
+    ], shape: 'circle' },
+  // ── Enrichment: Agents ──
+  { id: 'openai-agents', label: 'OpenAI Agents SDK', layer: 'agents', downloads: 1000000, risk: 72, depRepos: 500, maintainers: 'OpenAI (~10)', since: 2025,
+    blast: 'OpenAI Agents SDK (Q1 2025). Tool calls without sandbox by default. Handoffs between agents can propagate compromised context.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Tool calls without sandbox — prompt injection → arbitrary tool execution' },
+      { actor: 'supply-chain', vector: 'Malicious tools in OpenAI tool ecosystem can execute during agent handoffs' }
+    ], shape: 'circle' },
+  { id: 'semantic-kernel', label: 'Semantic Kernel', layer: 'agents', downloads: 500000, risk: 65, depRepos: 1000, maintainers: 'Microsoft (~20)', since: 2023,
+    blast: 'Microsoft enterprise agent framework. Azure integration. Plugin system allows arbitrary code execution via skill loading.',
+    cves: [],
+    attacks: [],
+    threats: [
+      { actor: 'supply-chain', vector: 'Malicious plugins in Semantic Kernel plugin ecosystem — arbitrary code execution via skill loading' },
+      { actor: 'crime', vector: 'Enterprise credential harvesting via Azure-integrated agent workflows' }
+    ], shape: 'circle' },
+  // ── Enrichment: Applications ──
+  { id: 'anythingllm', label: 'AnythingLLM', layer: 'app', downloads: 500000, risk: 75, depRepos: 500, maintainers: 'Mintplex Labs (~10)', since: 2023,
+    blast: '180K+ GitHub stars. Self-hosted RAG platform. Path traversal, SSRF, and auth bypass CVE history.',
+    cves: [
+      { id: 'CVE-2024-13059', cvss: 8.1, desc: 'Path traversal — arbitrary file read via document processing' },
+      { id: 'CVE-2024-13060', cvss: 7.5, desc: 'SSRF — server-side request forgery via URL import functionality' }
+    ],
+    attacks: [],
+    threats: [
+      { actor: 'opportunist', vector: 'Path traversal and SSRF on self-hosted RAG instances (CVE-2024-13059)' },
+      { actor: 'crime', vector: 'Data exfiltration from private document RAG deployments' }
+    ], shape: 'circle' },
 ];
 
 // Edges: source DEPENDS ON target (arrow from source → target)
@@ -1951,6 +2169,76 @@ const EDGES = [
   { source: 'guardrails-ai', target: 'langchain' },   // agent framework integration
   { source: 'guardrails-ai', target: 'anthropic-sdk' },// Claude integration
   { source: 'hf-hub',       target: 'safetensors' },  // primary safe format on HF Hub
+  // ── Enrichment: Vector Database edges ──
+  { source: 'chromadb',    target: 'numpy' },
+  { source: 'milvus',      target: 'numpy' },
+  { source: 'faiss',       target: 'numpy' },
+  { source: 'langchain',    target: 'chromadb' },  // default vector store
+  { source: 'langchain',    target: 'faiss' },     // FAISS integration
+  { source: 'langchain',    target: 'qdrant' },    // Qdrant integration
+  { source: 'langchain',    target: 'pgvector' },  // pgvector integration
+  { source: 'langchain',    target: 'milvus' },    // Milvus integration
+  { source: 'langchain',    target: 'weaviate' },  // Weaviate integration
+  { source: 'llamaindex',   target: 'chromadb' },  // default vector store
+  { source: 'llamaindex',   target: 'faiss' },
+  { source: 'llamaindex',   target: 'qdrant' },
+  { source: 'llamaindex',   target: 'milvus' },
+  { source: 'haystack',     target: 'qdrant' },
+  { source: 'haystack',     target: 'weaviate' },
+  { source: 'dify',         target: 'qdrant' },
+  { source: 'dify',         target: 'weaviate' },
+  { source: 'anythingllm',  target: 'chromadb' },
+  { source: 'anythingllm',  target: 'qdrant' },
+  // ── Enrichment: MCP edges ──
+  { source: 'mcp-sdk',        target: 'anthropic-sdk' },  // Anthropic MCP protocol
+  { source: 'langchain',      target: 'mcp-sdk' },        // LangChain MCP integration
+  { source: 'flowise',        target: 'mcp-sdk' },        // Flowise MCP nodes
+  { source: 'crewai',         target: 'mcp-sdk' },        // CrewAI MCP tools
+  { source: 'ag2',            target: 'mcp-sdk' },        // AG2 MCP integration
+  // ── Enrichment: Serving edges ──
+  { source: 'tensorrt-llm',   target: 'cuda' },
+  { source: 'tensorrt-llm',   target: 'pytorch' },
+  { source: 'tensorrt-llm',   target: 'transformers' },
+  { source: 'localai',        target: 'llama-cpp' },
+  { source: 'localai',        target: 'cuda' },
+  { source: 'gpt4all',        target: 'llama-cpp' },
+  { source: 'triton-server',  target: 'cuda' },
+  { source: 'triton-server',  target: 'pytorch' },
+  { source: 'triton-server',  target: 'tensorflow' },
+  { source: 'triton-server',  target: 'onnx' },
+  // ── Enrichment: Base library edges ──
+  { source: 'tiktoken',       target: 'numpy' },
+  { source: 'openai-sdk',     target: 'tiktoken' },   // token counting
+  { source: 'litellm',        target: 'tiktoken' },   // token counting
+  { source: 'langchain',      target: 'tiktoken' },   // token counting
+  { source: 'h5py',           target: 'numpy' },
+  { source: 'keras',          target: 'h5py' },        // .h5 model format
+  { source: 'cloudpickle',    target: 'numpy' },       // extended pickle
+  { source: 'ray',            target: 'cloudpickle' }, // distributed serialization
+  { source: 'dask',           target: 'cloudpickle' }, // distributed serialization
+  { source: 'mlflow',         target: 'cloudpickle' }, // model serialization
+  // ── Enrichment: Framework edges ──
+  { source: 'sentence-transformers', target: 'transformers' },
+  { source: 'sentence-transformers', target: 'hf-hub' },
+  { source: 'sentence-transformers', target: 'pytorch' },
+  { source: 'lightgbm',       target: 'numpy' },
+  { source: 'lightgbm',       target: 'scipy' },
+  { source: 'lightgbm',       target: 'mlflow' },
+  { source: 'timm',           target: 'pytorch' },
+  { source: 'timm',           target: 'hf-hub' },
+  { source: 'spacy',          target: 'numpy' },
+  { source: 'spacy',          target: 'hf-hub' },      // spaCy transformers pipeline
+  // ── Enrichment: Agent edges ──
+  { source: 'openai-agents',   target: 'openai-sdk' },
+  { source: 'openai-agents',   target: 'mcp-sdk' },     // MCP tool integration
+  { source: 'semantic-kernel', target: 'openai-sdk' },
+  { source: 'semantic-kernel', target: 'anthropic-sdk' },
+  { source: 'semantic-kernel', target: 'langchain' },
+  // ── Enrichment: Application edges ──
+  { source: 'anythingllm',    target: 'ollama' },
+  { source: 'anythingllm',    target: 'openai-sdk' },
+  { source: 'anythingllm',    target: 'langchain' },
+  { source: 'anythingllm',    target: 'hf-hub' },
 ];
 
 const INCIDENTS = [
@@ -2002,6 +2290,19 @@ const INCIDENTS = [
     desc: 'Legit Security: vulnerability in HuggingFace CI/CD allowed hijack of popular repos via malicious pull request. Attacker could gain write-access to any HF repo through CI pipeline injection. Tens of thousands of developers potentially impacted.' },
   { id: 'inc23', date: '2023-10', label: 'Shelltorch: TorchServe mass exposure', nodes: ['torchserve', 'pytorch'],
     desc: 'Oligo Security: 3 vulnerabilities in TorchServe. Management API without auth on 0.0.0.0:8081 → RCE via model registration from arbitrary URL. SSRF + SnakeYAML deserialization → RCE. Tens of thousands of instances exposed on public internet.' },
+  // ── Enrichment: New incidents ──
+  { id: 'inc24', date: '2024-04', label: 'Wiz: HuggingFace cross-tenant container escape', nodes: ['hf-hub'],
+    desc: 'Wiz Research: cross-tenant attack on HF Inference API — container escape via shared infrastructure → access to other users\' models and data. Full read access to other tenants\' model artifacts.' },
+  { id: 'inc25', date: '2024-03', label: 'CVE-2024-3660: Keras Lambda arbitrary code execution', nodes: ['keras', 'tensorflow'],
+    desc: 'CVE-2024-3660 CVSS 9.8: Keras 2 Lambda Layers allow arbitrary code injection via Lambda in .h5/SavedModel. Any model.load() with Lambda = code execution. CERT/CC VU#253266.' },
+  { id: 'inc26', date: '2025-04', label: 'MCP tool poisoning & mcp-remote RCE', nodes: ['mcp-sdk', 'langchain', 'crewai'],
+    desc: 'Invariant Labs: MCP tool poisoning via hidden instructions in tool descriptions. 43% of MCP implementations had command injection. CVE-2025-6514: mcp-remote RCE (CVSS 9.6, 437K downloads). WhatsApp histories, SSH keys, GitHub repos exfiltrated via tool calls.' },
+  { id: 'inc27', date: '2025-11', label: 'TensorRT-LLM ShadowMQ propagation', nodes: ['tensorrt-llm', 'vllm', 'sglang'],
+    desc: 'CVE-2025-23254 (CVSS 8.8): unsafe pickle deserialization via ZeroMQ propagated from vLLM to NVIDIA TensorRT-LLM via code copy-paste. Same vulnerability pattern in 5+ inference engines.' },
+  { id: 'inc28', date: '2024-06', label: 'PyPI ML typosquatting campaigns', nodes: ['setuptools'],
+    desc: 'Mass typosquatting campaigns targeting ML packages on PyPI: pytorch-lightning, nupmy, reqeusts, torchaudio variants. setup.py hooks execute cryptominers and credential stealers on pip install.' },
+  { id: 'inc29', date: '2025-01', label: 'Flowise critical CVE cascade', nodes: ['flowise'],
+    desc: 'Multiple critical CVEs: CVE-2025-58434 (CVSS 9.8 unauthenticated ATO), CVE-2024-31621 (auth bypass via case sensitivity, EPSS 60.74%). RCE via CustomMCP node and Supabase RPC Filter → execSync().' },
 ];
 
 const ATTACK_PATTERNS = [
@@ -2025,6 +2326,14 @@ const ATTACK_PATTERNS = [
     desc: 'GitHub Actions / HF Spaces CI → code injection via PR metadata, branch names, workflow triggers.',
     nodes: ['ultralytics', 'hf-hub'],
     papers: ['Ultralytics incident (2024-12)', 'HF AI Jacking (Legit Security)'] },
+  { id: 'vectordb-poisoning', label: 'Vector DB Poisoning', color: '#18ffff',
+    desc: 'Poisoned embeddings or documents in vector databases manipulate RAG retrieval results. Silent data corruption — no code execution required.',
+    nodes: ['chromadb', 'milvus', 'qdrant', 'faiss', 'pgvector', 'weaviate'],
+    papers: ['Poisoning RAG (arXiv)', 'Phantom: RAG Poisoning (arXiv)'] },
+  { id: 'mcp-tool-poisoning', label: 'MCP Tool Poisoning', color: '#e040fb',
+    desc: 'Malicious instructions hidden in MCP tool descriptions. Agent calls tools that exfiltrate data or execute commands. 43% of MCP implementations vulnerable.',
+    nodes: ['mcp-sdk', 'langchain', 'crewai', 'ag2', 'flowise'],
+    papers: ['Invariant Labs MCP Research (2025)', 'CVE-2025-6514'] },
 ];
 
 const RESEARCH_REFS = [
@@ -2044,6 +2353,13 @@ const RESEARCH_REFS = [
   { category: 'Talks',       title: 'From MLOps to MLOops',                          venue: 'BlackHat USA\'24', url: null },
   { category: 'Talks',       title: 'Confused Learning — Supply Chain via ML Models', venue: 'BlackHat Asia\'24', url: null },
   { category: 'Talks',       title: 'Hugging Face to Hug Worms',                     venue: 'BlackHat Asia\'24', url: null },
+  // ── Enrichment: New references ──
+  { category: 'Model Sec',   title: 'Phantom: RAG Poisoning via Adversarial Documents',  venue: 'arXiv',          url: null },
+  { category: 'Model Sec',   title: 'Free Hugs Parts 1-4: HuggingFace Ecosystem Exploits', venue: 'Checkmarx',   url: null },
+  { category: 'LLM Sec',     title: 'ShadowMQ: Cross-Framework Pickle RCE Propagation', venue: 'arXiv',          url: null },
+  { category: 'LLM Sec',     title: 'KV-Cache Sharing Prompt Leakage',                  venue: 'NDSS\'25',       url: null },
+  { category: 'Standards',   title: 'OWASP Top 10 for LLM Agents',                       venue: 'OWASP',          url: null },
+  { category: 'Talks',       title: 'MCP Security: Tool Poisoning & Agent Exploitation',  venue: 'DEF CON AI Village', url: null },
 ];
 
 // ══════════════════════════════════════════════════
@@ -2241,6 +2557,7 @@ function buildGraph() {
     base:      { x: W * 0.32, y: H * 0.82 },
     framework: { x: W * 0.3,  y: H * 0.5 },
     hf:        { x: W * 0.6,  y: H * 0.45 },
+    vectordb:  { x: W * 0.5,  y: H * 0.72 },
     serving:   { x: W * 0.8, y: H * 0.28 },
     agents:    { x: W * 0.72, y: H * 0.65 },
     app:       { x: W * 0.82, y: H * 0.72 },
