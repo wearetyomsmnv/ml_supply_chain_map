@@ -16,13 +16,17 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
 /* ── Layout Grid ── */
 #app {
   display: grid;
-  grid-template-rows: auto 1fr 160px;
-  grid-template-columns: 340px 1fr;
+  grid-template-rows: auto 1fr 100px;
+  grid-template-columns: 290px 1fr;
   grid-template-areas:
     "header header"
     "sidebar main"
     "timeline timeline";
   width: 100vw; height: 100vh;
+  transition: grid-template-columns 0.3s ease;
+}
+#app.sidebar-hidden {
+  grid-template-columns: 0px 1fr;
 }
 
 /* ── Header ── */
@@ -110,12 +114,34 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   grid-area: sidebar;
   background: #0d1117;
   border-right: 1px solid rgba(255,255,255,0.06);
-  overflow-y: auto; padding: 16px;
+  overflow-y: auto; overflow-x: hidden; padding: 14px;
   scrollbar-width: thin; scrollbar-color: #1a2030 #0d1117;
+  transition: transform 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  min-width: 0;
+}
+#app.sidebar-hidden #sidebar {
+  transform: translateX(-100%);
+  opacity: 0; padding: 0;
+  pointer-events: none;
 }
 #sidebar::-webkit-scrollbar { width: 6px; }
 #sidebar::-webkit-scrollbar-track { background: #0d1117; }
 #sidebar::-webkit-scrollbar-thumb { background: #1a2030; border-radius: 3px; }
+
+/* ── Sidebar Toggle Button ── */
+#sidebarToggle {
+  position: fixed; left: 290px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 20; width: 20px; height: 48px;
+  background: #161c28; border: 1px solid rgba(255,255,255,0.08);
+  border-left: none; border-radius: 0 6px 6px 0;
+  color: #556; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; transition: all 0.3s ease;
+  padding: 0;
+}
+#sidebarToggle:hover { color: #aab; background: #1a2030; }
+#app.sidebar-hidden #sidebarToggle { left: 0; }
 
 .sidebar-section-title {
   font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
@@ -641,6 +667,249 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   animation: searchPing 1.2s ease-out forwards;
   pointer-events: none;
 }
+
+/* ── Attack Path Calculator ── */
+#attack-paths-panel { display: none; margin-top: 16px; }
+#attack-paths-panel.visible { display: block; }
+.atk-btn { border-color: #ff6d00; color: #ff6d00; }
+.atk-btn:hover { background: rgba(255,109,0,0.12); }
+.atk-btn.active { background: #ff6d00; color: #fff; box-shadow: 0 0 20px rgba(255,109,0,0.4); }
+
+.attack-path-card {
+    background: rgba(255,23,68,0.04);
+    border: 1px solid rgba(255,23,68,0.15);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+    cursor: pointer; transition: all 0.2s;
+}
+.attack-path-card:hover {
+    background: rgba(255,23,68,0.08);
+    border-color: rgba(255,23,68,0.3);
+}
+.attack-path-card.active {
+    border-color: #ff1744;
+    box-shadow: 0 0 12px rgba(255,23,68,0.2);
+}
+.path-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+}
+.path-title { font-size: 12px; font-weight: 600; color: #ff8a80; }
+.path-score {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #ff1744; background: rgba(255,23,68,0.15);
+    padding: 2px 6px; border-radius: 3px;
+}
+.path-step {
+    display: flex; gap: 8px; padding: 4px 0;
+    border-left: 2px solid rgba(255,23,68,0.2);
+    margin-left: 8px; padding-left: 12px;
+}
+.path-step-number {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #ff1744; font-weight: 700; width: 14px; flex-shrink: 0;
+}
+.path-step-content { flex: 1; }
+.path-step-node { font-size: 11px; font-weight: 600; color: #ddd; }
+.path-step-atlas {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: #ff9100; margin-top: 1px;
+}
+.path-step-atlas a { color: #ff9100; text-decoration: none; }
+.path-step-atlas a:hover { text-decoration: underline; }
+.path-step-incident {
+    font-size: 9px; color: #889; margin-top: 2px;
+    display: flex; align-items: center; gap: 4px;
+}
+.atk-paths-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+    color: #ff6d00; font-weight: 600; margin-bottom: 8px;
+}
+.atk-paths-subtitle { font-size: 11px; color: #667; margin-bottom: 12px; }
+.atk-paths-empty { font-size: 11px; color: #445; font-style: italic; }
+@keyframes atkDash { to { stroke-dashoffset: -20; } }
+.atk-path-edge {
+    stroke: #ff1744; stroke-width: 2.5; stroke-dasharray: 6,4;
+    animation: atkDash 0.6s linear infinite; fill: none; pointer-events: none;
+}
+.atk-hop-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    fill: #ff1744; font-weight: 700; pointer-events: none;
+    text-anchor: middle; dominant-baseline: central;
+}
+
+/* ── Temporal Heatmap ── */
+.view-toggle-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    padding: 4px 12px; border-radius: 12px; cursor: pointer;
+    border: 1px solid rgba(0,229,255,0.2); background: transparent;
+    color: #556; transition: all 0.2s; line-height: 1.3;
+}
+.view-toggle-btn:hover { opacity: 1; color: #99b; }
+.view-toggle-btn.active {
+    opacity: 1; color: #00e5ff; border-color: #00e5ff;
+    background: rgba(0,229,255,0.08);
+    box-shadow: 0 0 8px rgba(0,229,255,0.15);
+}
+.hm-bg-cell { fill: rgba(255,255,255,0.02); }
+.hm-bg-cell:hover { fill: rgba(255,255,255,0.06); }
+.heatmap-cell { cursor: pointer; transition: all 0.15s; filter: saturate(1.1); }
+.heatmap-cell:hover { stroke: #fff; stroke-width: 2; filter: brightness(1.3) saturate(1.3); }
+.hm-cell-text {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600;
+    fill: #fff; text-anchor: middle; dominant-baseline: central;
+    pointer-events: none; opacity: 0.9;
+}
+.heatmap-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    fill: #99a; cursor: pointer; transition: fill 0.15s;
+}
+.heatmap-label:hover { fill: #fff; }
+.heatmap-quarter-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    fill: #667; text-anchor: middle; font-weight: 500;
+}
+.hm-year-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    fill: #889; text-anchor: middle; font-weight: 600; letter-spacing: 1px;
+}
+.heatmap-layer-label {
+    font-size: 9px; text-transform: uppercase;
+    letter-spacing: 2px; font-weight: 700;
+}
+.hm-layer-bg { opacity: 0.04; }
+.hm-row-hover { fill: rgba(255,255,255,0.03); opacity: 0; transition: opacity 0.15s; }
+.hm-row-hover:hover { opacity: 1; }
+.hm-risk-bar { opacity: 0.5; }
+.heatmap-tooltip {
+    position: fixed; z-index: 200; pointer-events: none;
+    background: #161c28; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 10px 12px; font-size: 11px;
+    color: #ccc; max-width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    display: none; line-height: 1.5;
+}
+.heatmap-tooltip.visible { display: block; }
+.hm-legend-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 8px;
+    fill: #556; text-anchor: middle;
+}
+
+/* ── LLM Chat Panel ── */
+#llm-chat {
+    position: fixed; bottom: 170px; right: 20px;
+    width: 380px; max-height: 450px;
+    background: #0d1219; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; z-index: 150;
+    display: flex; flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    font-family: 'Inter', sans-serif;
+    transition: max-height 0.3s;
+}
+#llm-chat.collapsed { max-height: 36px; overflow: hidden; }
+.chat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 12px; font-weight: 600; color: #aab;
+}
+.chat-header:hover { color: #fff; }
+.chat-minimize { background: none; border: none; color: #667; cursor: pointer; font-size: 14px; padding: 0 4px; }
+.chat-minimize:hover { color: #fff; }
+.chat-messages {
+    flex: 1; overflow-y: auto; padding: 10px;
+    min-height: 200px; max-height: 320px;
+    scrollbar-width: thin; scrollbar-color: #1a2030 #0d1219;
+}
+.chat-msg { margin-bottom: 10px; font-size: 12px; line-height: 1.5; }
+.chat-msg.user { text-align: right; color: #00e5ff; }
+.chat-msg.user .msg-bubble {
+    display: inline-block; background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 10px 10px 0 10px; padding: 6px 10px;
+    text-align: left; max-width: 85%;
+}
+.chat-msg.ai .msg-bubble {
+    display: inline-block; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px 10px 10px 0; padding: 6px 10px;
+    max-width: 90%;
+}
+.chat-msg.ai { color: #ccc; }
+.chat-msg.error .msg-bubble {
+    border-color: rgba(255,23,68,0.3); color: #ff8a80;
+}
+.chat-node-link {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #00e5ff; cursor: pointer; text-decoration: underline;
+    text-decoration-style: dotted;
+}
+.chat-node-link:hover { text-decoration-style: solid; }
+.chat-atlas-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #ff9100; background: rgba(255,145,0,0.1);
+    padding: 1px 4px; border-radius: 2px; text-decoration: none;
+}
+.chat-input-row {
+    display: flex; gap: 8px; padding: 8px 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.chat-input {
+    flex: 1; font-family: 'Inter', sans-serif; font-size: 12px;
+    background: rgba(255,255,255,0.04); color: #e0e0e0;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+    padding: 6px 10px; outline: none;
+}
+.chat-input::placeholder { color: #445; }
+.chat-input:focus { border-color: rgba(0,229,255,0.3); }
+.chat-send-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    border: 1px solid rgba(0,229,255,0.3); color: #00e5ff;
+    background: transparent; transition: all 0.2s;
+}
+.chat-send-btn:hover { background: rgba(0,229,255,0.1); }
+.chat-send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+@keyframes chatTyping {
+    0%, 80%, 100% { opacity: 0.3; }
+    40% { opacity: 1; }
+}
+.chat-typing span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #556; margin: 0 2px;
+    animation: chatTyping 1.4s infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ── Settings Modal ── */
+.settings-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 300; display: none; align-items: center; justify-content: center;
+}
+.settings-modal-overlay.visible { display: flex; }
+.settings-modal {
+    background: #161c28; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 20px; width: 400px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+}
+.settings-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: #e0e0e0; }
+.settings-label { font-size: 11px; color: #889; margin-bottom: 4px; display: block; }
+.settings-input {
+    width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: rgba(255,255,255,0.04); color: #e0e0e0;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+    padding: 8px 10px; outline: none; margin-bottom: 12px;
+}
+.settings-hint { font-size: 10px; color: #556; line-height: 1.4; margin-bottom: 14px; }
+.settings-hint a { color: #00e5ff; text-decoration: none; }
+.settings-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    padding: 6px 16px; border-radius: 5px; cursor: pointer;
+    border: 1px solid; transition: all 0.2s; margin-right: 8px;
+}
+.settings-btn-save { border-color: #76ff03; color: #76ff03; background: transparent; }
+.settings-btn-save:hover { background: rgba(118,255,3,0.12); }
+.settings-btn-cancel { border-color: #555; color: #999; background: transparent; }
+.settings-btn-cancel:hover { border-color: #999; color: #fff; }
 </style>
 </head>
 <body>
@@ -648,7 +917,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   <!-- HEADER -->
   <header id="header">
     <div class="header-row-top">
-      <h1>DEPENDENCY MAP &middot; ML SUPPLY CHAIN</h1>
+      <h1>ML SUPPLY CHAIN SECURITY MAP</h1>
       <div class="header-actions">
         <div class="search-wrap" id="searchWrap">
           <span class="search-icon">&#x2315;</span>
@@ -659,6 +928,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
         </div>
         <button class="sim-btn" id="simBtn" onclick="toggleSimMode()">&#x26A0; Simulate</button>
         <button class="sim-reset" id="simReset" onclick="resetSimulation()">Reset</button>
+        <button class="sim-btn atk-btn" id="atkBtn" onclick="toggleAttackPathMode()">&#x2694; Attack Paths</button>
+        <button class="sim-btn" id="settingsBtn" onclick="openSettings()" style="border-color:#556;color:#889">&#x2699;</button>
       </div>
     </div>
     <div class="header-row-filters">
@@ -671,10 +942,17 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
         <span class="filter-group-label">Year</span>
         <div class="year-filters" id="yearFilters"></div>
       </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group">
+        <span class="filter-group-label">View</span>
+        <button class="view-toggle-btn active" id="viewGraph" onclick="switchView('graph')">Graph</button>
+        <button class="view-toggle-btn" id="viewHeatmap" onclick="switchView('heatmap')">Heatmap</button>
+      </div>
     </div>
   </header>
 
   <!-- SIDEBAR -->
+  <button id="sidebarToggle" onclick="toggleSidebar()" title="Toggle sidebar">&#x25C0;</button>
   <aside id="sidebar">
     <div style="margin-bottom:12px;font-size:11px;color:#667;"><a href="https://t.me/pwnai" target="_blank" rel="noopener" style="color:#00e5ff;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:11px;">@pwnai</a> <span style="color:#445;font-size:10px;">on Telegram</span></div>
     <a class="contact-banner" href="https://t.me/wearetyomsmnv" target="_blank" rel="noopener">
@@ -856,11 +1134,21 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
         </div>
       </div>
     </div>
+
+    <!-- Attack Paths panel -->
+    <div id="attack-paths-panel">
+      <div class="atk-paths-title">Attack Paths To: <span id="atkTargetName">—</span></div>
+      <div class="atk-paths-subtitle" id="atkPathsCount"></div>
+      <div id="attackPathsList"></div>
+      <div class="atk-paths-empty" id="atkPathsEmpty" style="display:none">No attack paths found for this node.</div>
+    </div>
   </aside>
 
   <!-- MAIN GRAPH -->
   <div id="main">
     <svg id="graphSvg"></svg>
+    <svg id="heatmapSvg" style="display:none; width:100%; height:100%"></svg>
+    <div class="heatmap-tooltip" id="heatmapTooltip"></div>
     <div class="graph-tooltip" id="tooltip"></div>
     <div class="graph-hint" id="graphHint">scroll: zoom &middot; drag: navigate &middot; click: details</div>
   </div>
@@ -876,6 +1164,36 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   </div>
 </div>
 <div id="timeline-tooltip-overlay"></div>
+
+<!-- LLM Chat Panel -->
+<div id="llm-chat" class="collapsed">
+  <div class="chat-header" onclick="toggleChat()">
+    <span>&#x1F916; Ask about the map</span>
+    <button class="chat-minimize" id="chatMinBtn">&#x25BC;</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg ai"><div class="msg-bubble">Ask me about attack paths, high-risk nodes, MITRE ATLAS mappings, or any part of the ML supply chain.</div></div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Type a question..." autocomplete="off" spellcheck="false">
+    <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="settings-modal-overlay" id="settingsOverlay">
+  <div class="settings-modal">
+    <div class="settings-title">&#x2699; Settings</div>
+    <label class="settings-label">Groq API Key</label>
+    <input class="settings-input" id="groqKeyInput" type="password" placeholder="gsk_..." autocomplete="off">
+    <div class="settings-hint">
+      Free API key from <a href="https://console.groq.com" target="_blank">console.groq.com</a>
+      &mdash; no credit card required. Stored locally in your browser only.
+    </div>
+    <button class="settings-btn settings-btn-save" onclick="saveSettings()">Save</button>
+    <button class="settings-btn settings-btn-cancel" onclick="closeSettings()">Cancel</button>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════
@@ -2369,10 +2687,87 @@ const RESEARCH_REFS = [
 ];
 
 // ══════════════════════════════════════════════════
+// MITRE ATLAS DATA
+// ══════════════════════════════════════════════════
+
+const ATLAS_TECHNIQUES = {
+    'AML.T0010':     { id: 'AML.T0010',     name: 'ML Supply Chain Compromise',       desc: 'Adversary compromises ML supply chain components',                          url: 'https://atlas.mitre.org/techniques/AML.T0010' },
+    'AML.T0010.000': { id: 'AML.T0010.000', name: 'ML Software Dependencies',         desc: 'Target software dependencies used in ML stack',                             url: 'https://atlas.mitre.org/techniques/AML.T0010.000' },
+    'AML.T0010.001': { id: 'AML.T0010.001', name: 'ML Model Repositories',            desc: 'Compromise models in public repositories (HF Hub, model zoos)',             url: 'https://atlas.mitre.org/techniques/AML.T0010.001' },
+    'AML.T0010.002': { id: 'AML.T0010.002', name: 'Data Stores',                      desc: 'Compromise data stores used for training or inference',                     url: 'https://atlas.mitre.org/techniques/AML.T0010.002' },
+    'AML.T0018':     { id: 'AML.T0018',     name: 'Backdoor ML Model',                desc: 'Embed hidden functionality in ML model that activates on trigger',          url: 'https://atlas.mitre.org/techniques/AML.T0018' },
+    'AML.T0019':     { id: 'AML.T0019',     name: 'Publish Poisoned Datasets',        desc: 'Publish manipulated datasets to public repositories',                       url: 'https://atlas.mitre.org/techniques/AML.T0019' },
+    'AML.T0020':     { id: 'AML.T0020',     name: 'Poison Training Data',             desc: 'Manipulate training data to influence model behavior',                      url: 'https://atlas.mitre.org/techniques/AML.T0020' },
+    'AML.T0024':     { id: 'AML.T0024',     name: 'Exfiltration via ML Inference API', desc: 'Extract data through model inference endpoints',                           url: 'https://atlas.mitre.org/techniques/AML.T0024' },
+    'AML.T0040':     { id: 'AML.T0040',     name: 'ML Model Inference API Access',    desc: 'Gain access to model prediction interfaces',                                url: 'https://atlas.mitre.org/techniques/AML.T0040' },
+    'AML.T0043':     { id: 'AML.T0043',     name: 'Craft Adversarial Data',           desc: 'Create inputs designed to cause model misclassification',                   url: 'https://atlas.mitre.org/techniques/AML.T0043' },
+    'AML.T0049':     { id: 'AML.T0049',     name: 'Exploit Public-Facing Application', desc: 'Exploit vulnerabilities in public ML endpoints',                           url: 'https://atlas.mitre.org/techniques/AML.T0049' },
+    'AML.T0051':     { id: 'AML.T0051',     name: 'LLM Prompt Injection',             desc: 'Manipulate LLM behavior through crafted inputs',                            url: 'https://atlas.mitre.org/techniques/AML.T0051' },
+    'AML.T0051.000': { id: 'AML.T0051.000', name: 'Direct Prompt Injection',          desc: 'Directly inject malicious instructions into LLM prompt',                    url: 'https://atlas.mitre.org/techniques/AML.T0051.000' },
+    'AML.T0051.001': { id: 'AML.T0051.001', name: 'Indirect Prompt Injection',        desc: 'Inject via external data sources processed by LLM',                         url: 'https://atlas.mitre.org/techniques/AML.T0051.001' },
+    'AML.T0054':     { id: 'AML.T0054',     name: 'LLM Jailbreak',                    desc: 'Bypass LLM safety controls to execute unauthorized actions',                url: 'https://atlas.mitre.org/techniques/AML.T0054' },
+    'AML.T0048':     { id: 'AML.T0048',     name: 'External Harms',                   desc: 'Cause financial, reputational, or physical harm via AI abuse',              url: 'https://atlas.mitre.org/techniques/AML.T0048' },
+    'AML.T0062':     { id: 'AML.T0062',     name: 'Exfiltration via AI Agent Tool Invocation', desc: 'Use legitimate agent tool calls to extract data',                  url: 'https://atlas.mitre.org/techniques/AML.T0062' },
+    'AML.T0012':     { id: 'AML.T0012',     name: 'Valid Accounts',                   desc: 'Acquire legitimate credentials to access ML systems',                       url: 'https://atlas.mitre.org/techniques/AML.T0012' },
+};
+
+function hasPickleRisk(node) {
+    if (!node) return false;
+    const text = (node.blast + ' ' + JSON.stringify(node.cves) + ' ' + JSON.stringify(node.attacks)).toLowerCase();
+    return text.includes('pickle') || text.includes('deserialization') || text.includes('torch.load');
+}
+
+const ATLAS_EDGE_RULES = [
+    { condition: (src, tgt) => tgt.id === 'setuptools',
+      technique: 'AML.T0010.000', label: 'PyPI supply chain entry' },
+    { condition: (src, tgt) => tgt.id === 'hf-hub' || tgt.layer === 'hf',
+      technique: 'AML.T0010.001', label: 'Model repository compromise' },
+    { condition: (src, tgt) => tgt.id === 'datasets' || tgt.id === 'pyarrow',
+      technique: 'AML.T0019', label: 'Poisoned dataset distribution' },
+    { condition: (src, tgt) => hasPickleRisk(src) || hasPickleRisk(tgt),
+      technique: 'AML.T0010.000', label: 'Pickle deserialization in dependency' },
+    { condition: (src, tgt) => src.layer === 'agents' || tgt.layer === 'agents',
+      technique: 'AML.T0062', label: 'Agent tool invocation exploitation' },
+    { condition: (src, tgt) => src.layer === 'app' && tgt.layer === 'serving',
+      technique: 'AML.T0051', label: 'LLM prompt injection via serving' },
+    { condition: (src, tgt) => tgt.cves && tgt.cves.some(c => c.cvss >= 9.0),
+      technique: 'AML.T0049', label: 'Exploit critical CVE in public endpoint' },
+    { condition: (src, tgt) => tgt.layer === 'hardware',
+      technique: 'AML.T0010', label: 'Hardware supply chain compromise' },
+    { condition: (src, tgt) => tgt.id === 'transformers' || tgt.id === 'safetensors',
+      technique: 'AML.T0018', label: 'Backdoor ML model via format exploit' },
+    { condition: (src, tgt) => tgt.layer === 'serving',
+      technique: 'AML.T0040', label: 'ML inference API access' },
+    { condition: () => true,
+      technique: 'AML.T0010', label: 'ML supply chain dependency' },
+];
+
+const ATLAS_CASE_STUDY_MAP = {
+    'inc1':  { csId: null,          techniques: ['AML.T0010.000'] },
+    'inc2':  { csId: null,          techniques: ['AML.T0010.001', 'AML.T0018'] },
+    'inc4':  { csId: null,          techniques: ['AML.T0010.001', 'AML.T0018'] },
+    'inc5':  { csId: null,          techniques: ['AML.T0010.000', 'AML.T0049'] },
+    'inc6':  { csId: null,          techniques: ['AML.T0049', 'AML.T0010.000'] },
+    'inc7':  { csId: null,          techniques: ['AML.T0051', 'AML.T0024'] },
+    'inc8':  { csId: null,          techniques: ['AML.T0049'] },
+    'inc9':  { csId: null,          techniques: ['AML.T0010.001', 'AML.T0018'] },
+    'inc11': { csId: null,          techniques: ['AML.T0049', 'AML.T0054'] },
+    'inc12': { csId: null,          techniques: ['AML.T0062', 'AML.T0051.001'] },
+    'inc15': { csId: null,          techniques: ['AML.T0010.000'] },
+    'inc16': { csId: 'AML.CS0029', techniques: ['AML.T0049', 'AML.T0012'] },
+    'inc19': { csId: null,          techniques: ['AML.T0010.000'] },
+    'inc21': { csId: null,          techniques: ['AML.T0012'] },
+    'inc23': { csId: null,          techniques: ['AML.T0049', 'AML.T0040'] },
+};
+
+// ══════════════════════════════════════════════════
 // GLOBALS
 // ══════════════════════════════════════════════════
 let simulation, svg, g, linkGroup, nodeGroup, hullGroup, arrowDefs, graphZoom;
 let simMode = false;
+let attackPathMode = false;
+let currentView = 'graph';
+let chatHistory = [];
 let activeFilters = new Set(Object.keys(LAYERS));
 let activeYearFilter = null;  // null = show all
 let nodeMap = {};
@@ -2397,6 +2792,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildGraph();
   buildAttackRanking();
   buildResearchLibrary();
+  initChat();
 });
 
 // ══════════════════════════════════════════════════
@@ -2505,6 +2901,9 @@ function updateVisibility() {
 
   // Gentle reheat so layout adjusts to hidden/shown nodes
   if (simulation) { simulation.alpha(0.15).restart(); }
+
+  // Re-render heatmap if active
+  if (currentView === 'heatmap') renderHeatmap();
 }
 
 // ══════════════════════════════════════════════════
@@ -2741,7 +3140,7 @@ function dragEnd(event, d) {
 // HOVER — highlight neighbors
 // ══════════════════════════════════════════════════
 function onNodeHover(event, d) {
-  if (simMode) return;
+  if (simMode || attackPathMode) return;
 
   const neighbors = new Set([d.id]);
   (adjForward[d.id] || []).forEach(n => neighbors.add(n));
@@ -2769,7 +3168,7 @@ function onNodeHover(event, d) {
 }
 
 function onNodeOut(event, d) {
-  if (simMode) return;
+  if (simMode || attackPathMode) return;
   nodeGroup.classed('dimmed', false).classed('highlighted', false);
   linkGroup.classed('dimmed', false);
   document.getElementById('tooltip').style.display = 'none';
@@ -2781,6 +3180,11 @@ function onNodeOut(event, d) {
 function onNodeClick(event, d) {
   event.stopPropagation();
   document.getElementById('tooltip').style.display = 'none';
+
+  if (attackPathMode) {
+    renderAttackPaths(d);
+    return;
+  }
 
   if (simMode) {
     runCompromiseSimulation(d);
@@ -2875,6 +3279,8 @@ function toggleSimMode() {
   const hint = document.getElementById('graphHint');
 
   if (simMode) {
+    // Disable attack path mode if active
+    if (attackPathMode) toggleAttackPathMode();
     btn.classList.add('active');
     btn.innerHTML = '&#x26A0; SIMULATION MODE ACTIVE';
     resetBtn.style.display = 'inline-block';
@@ -2903,6 +3309,10 @@ function resetSimulation() {
   document.querySelectorAll('.link-arrow').forEach(el => el.classList.remove('compromise-arrow'));
 
   document.getElementById('compromise-panel').classList.remove('visible');
+
+  // Also clear attack path highlights if any
+  if (typeof clearAttackPathHighlight === 'function') clearAttackPathHighlight();
+  document.getElementById('attack-paths-panel').classList.remove('visible');
 }
 
 function runCompromiseSimulation(startNode) {
@@ -3530,6 +3940,857 @@ function highlightNodeGroup(nodeIds) {
     }
   });
 })();
+
+// ══════════════════════════════════════════════════
+// ATTACK PATH CALCULATOR
+// ══════════════════════════════════════════════════
+
+function parseMaintainerCount(str) {
+    if (!str) return 99;
+    const m = str.match(/\(~?(\d+)\)/);
+    if (m) return parseInt(m[1]);
+    if (str.match(/corp|inc|team|foundation/i)) return 99;
+    return str.split(/[,&+]/).length;
+}
+
+function isEntryPoint(nodeId) {
+    const node = nodeMap[nodeId];
+    if (!node) return false;
+    if (node.layer === 'hardware') return true;
+    if (nodeId === 'setuptools') return true;
+    if (nodeId === 'hf-hub') return true;
+    if (node.attacks && node.attacks.length > 0) return true;
+    const mc = parseMaintainerCount(node.maintainers);
+    if (mc <= 5 && node.downloads > 50000000) return true;
+    return false;
+}
+
+function computeAttackPaths(targetId, maxDepth, maxPaths) {
+    maxDepth = maxDepth || 5;
+    maxPaths = maxPaths || 8;
+    const allPaths = [];
+
+    function dfs(currentId, path, visited, depth) {
+        if (depth > maxDepth) return;
+        const deps = adjForward[currentId] || [];
+        for (const dep of deps) {
+            if (visited.has(dep)) continue;
+            const newPath = [dep].concat(path);
+            if (isEntryPoint(dep)) {
+                allPaths.push(newPath.slice());
+            }
+            visited.add(dep);
+            dfs(dep, newPath, visited, depth + 1);
+            visited.delete(dep);
+        }
+    }
+
+    dfs(targetId, [targetId], new Set([targetId]), 0);
+
+    const scoredPaths = allPaths.map(function(path) {
+        return {
+            path: path,
+            score: computePathScore(path),
+            atlas: mapPathToATLAS(path),
+            incidents: findRelatedIncidents(path),
+        };
+    });
+
+    return scoredPaths.sort(function(a, b) { return b.score - a.score; }).slice(0, maxPaths);
+}
+
+function computePathScore(path) {
+    let score = 0;
+    for (const nodeId of path) {
+        const node = nodeMap[nodeId];
+        if (!node) continue;
+        score += node.risk * 0.3;
+        score += (node.attacks ? node.attacks.length : 0) * 15;
+        score += (node.cves ? node.cves.length : 0) * 10;
+        const mc = parseMaintainerCount(node.maintainers);
+        if (mc <= 5) score += 20;
+        if (mc <= 3) score += 15;
+    }
+    score *= (1 / Math.sqrt(path.length));
+    const atlasCount = mapPathToATLAS(path).filter(function(a) { return a.technique; }).length;
+    score += atlasCount * 12;
+    return Math.round(Math.min(score, 100));
+}
+
+function mapPathToATLAS(path) {
+    const result = [];
+    for (let i = 0; i < path.length - 1; i++) {
+        const srcNode = nodeMap[path[i]];
+        const tgtNode = nodeMap[path[i + 1]];
+        let matched = null;
+        for (const rule of ATLAS_EDGE_RULES) {
+            if (rule.condition(srcNode || {}, tgtNode || {})) {
+                matched = { technique: rule.technique, label: rule.label };
+                break;
+            }
+        }
+        result.push(matched || { technique: 'AML.T0010', label: 'ML supply chain dependency' });
+    }
+    return result;
+}
+
+function findRelatedIncidents(path) {
+    const pathNodeIds = new Set(path);
+    return INCIDENTS.filter(function(inc) {
+        return inc.nodes.some(function(nid) { return pathNodeIds.has(nid); });
+    }).map(function(inc) {
+        return {
+            id: inc.id,
+            date: inc.date,
+            label: inc.label,
+            matchedNodes: inc.nodes.filter(function(nid) { return pathNodeIds.has(nid); }),
+        };
+    });
+}
+
+function toggleAttackPathMode() {
+    attackPathMode = !attackPathMode;
+    const btn = document.getElementById('atkBtn');
+    const hint = document.getElementById('graphHint');
+
+    if (attackPathMode) {
+        // Disable sim mode if active
+        if (simMode) { toggleSimMode(); }
+        btn.classList.add('active');
+        hint.textContent = 'Click a target node to compute attack paths';
+    } else {
+        btn.classList.remove('active');
+        hint.textContent = 'scroll: zoom \u00B7 drag: navigate \u00B7 click: details';
+        clearAttackPathHighlight();
+        document.getElementById('attack-paths-panel').classList.remove('visible');
+    }
+}
+
+function renderPathCard(pathData, index) {
+    const hopLabels = ['\u2460','\u2461','\u2462','\u2463','\u2464','\u2465','\u2466','\u2467'];
+    let stepsHtml = '';
+    for (let i = 0; i < pathData.path.length; i++) {
+        const nodeId = pathData.path[i];
+        const node = nodeMap[nodeId];
+        const label = node ? node.label : nodeId;
+        const isTarget = i === pathData.path.length - 1;
+        let atlasHtml = '';
+        if (i < pathData.atlas.length) {
+            const a = pathData.atlas[i];
+            const tech = ATLAS_TECHNIQUES[a.technique];
+            if (tech) {
+                atlasHtml = '<div class="path-step-atlas">\u2193 <a href="' + tech.url + '" target="_blank" title="' + tech.name + '">' + a.technique + '</a> ' + a.label + '</div>';
+            }
+        }
+        let incHtml = '';
+        const nodeIncs = pathData.incidents.filter(function(inc) { return inc.matchedNodes.includes(nodeId); });
+        if (nodeIncs.length > 0) {
+            incHtml = nodeIncs.map(function(inc) {
+                return '<div class="path-step-incident">' + inc.id + ': ' + inc.label.substring(0, 40) + '</div>';
+            }).join('');
+        }
+        stepsHtml += '<div class="path-step">' +
+            '<div class="path-step-number">' + hopLabels[i] + '</div>' +
+            '<div class="path-step-content">' +
+            '<div class="path-step-node" style="color:' + (node ? LAYERS[node.layer].color : '#ddd') + '">' + label + (isTarget ? ' [TARGET]' : '') + '</div>' +
+            atlasHtml + incHtml +
+            '</div></div>';
+    }
+
+    return '<div class="attack-path-card" data-path-idx="' + index + '" ' +
+        'onmouseenter="highlightAttackPathByIdx(' + index + ')" ' +
+        'onmouseleave="clearAttackPathHighlight()">' +
+        '<div class="path-header">' +
+        '<div class="path-title">Path ' + (index + 1) + ' \u2014 ' + pathData.path.length + ' hops</div>' +
+        '<div class="path-score">' + pathData.score + '/100</div>' +
+        '</div>' + stepsHtml + '</div>';
+}
+
+// Store last computed paths for hover highlight
+let lastComputedPaths = [];
+
+function renderAttackPaths(targetNode) {
+    const panel = document.getElementById('attack-paths-panel');
+    const listEl = document.getElementById('attackPathsList');
+    const emptyEl = document.getElementById('atkPathsEmpty');
+
+    document.getElementById('atkTargetName').textContent = targetNode.label;
+    document.getElementById('node-detail').classList.remove('visible');
+    document.getElementById('compromise-panel').classList.remove('visible');
+
+    lastComputedPaths = computeAttackPaths(targetNode.id);
+
+    if (lastComputedPaths.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        document.getElementById('atkPathsCount').textContent = '';
+    } else {
+        emptyEl.style.display = 'none';
+        document.getElementById('atkPathsCount').textContent = lastComputedPaths.length + ' path' + (lastComputedPaths.length > 1 ? 's' : '') + ' found';
+        listEl.innerHTML = lastComputedPaths.map(function(pd, idx) { return renderPathCard(pd, idx); }).join('');
+    }
+
+    panel.classList.add('visible');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function highlightAttackPathByIdx(idx) {
+    if (idx >= 0 && idx < lastComputedPaths.length) {
+        highlightAttackPath(lastComputedPaths[idx].path);
+    }
+}
+
+function highlightAttackPath(path) {
+    clearAttackPathHighlight();
+    if (!path || path.length < 2) return;
+
+    const pathSet = new Set(path);
+    const hopLabels = ['\u2460','\u2461','\u2462','\u2463','\u2464','\u2465','\u2466','\u2467'];
+
+    // Dim non-path nodes
+    nodeGroup.classed('dimmed', function(n) { return !pathSet.has(n.id); });
+    nodeGroup.classed('highlighted', function(n) { return pathSet.has(n.id); });
+
+    // Dim non-path edges
+    linkGroup.classed('dimmed', true);
+
+    // Draw attack path edges
+    const pathEdges = [];
+    for (let i = 0; i < path.length - 1; i++) {
+        pathEdges.push({ source: path[i], target: path[i + 1] });
+    }
+
+    // Find node positions
+    const posMap = {};
+    nodeGroup.each(function(n) { if (pathSet.has(n.id)) posMap[n.id] = { x: n.x, y: n.y }; });
+
+    // Draw animated dashed path edges
+    pathEdges.forEach(function(edge) {
+        const sp = posMap[edge.source];
+        const tp = posMap[edge.target];
+        if (!sp || !tp) return;
+        g.append('line')
+            .attr('class', 'atk-path-edge')
+            .attr('x1', sp.x).attr('y1', sp.y)
+            .attr('x2', tp.x).attr('y2', tp.y);
+    });
+
+    // Draw hop number labels
+    path.forEach(function(nodeId, i) {
+        const pos = posMap[nodeId];
+        if (!pos) return;
+        g.append('text')
+            .attr('class', 'atk-hop-label')
+            .attr('x', pos.x).attr('y', pos.y - 18)
+            .text(hopLabels[i] || (i + 1));
+    });
+}
+
+function clearAttackPathHighlight() {
+    if (!g) return;
+    g.selectAll('.atk-path-edge').remove();
+    g.selectAll('.atk-hop-label').remove();
+    if (!attackPathMode) {
+        nodeGroup.classed('dimmed', false).classed('highlighted', false);
+        linkGroup.classed('dimmed', false);
+    }
+}
+
+// ══════════════════════════════════════════════════
+// TEMPORAL HEATMAP
+// ══════════════════════════════════════════════════
+
+function toggleSidebar() {
+    var app = document.getElementById('app');
+    var btn = document.getElementById('sidebarToggle');
+    app.classList.toggle('sidebar-hidden');
+    btn.innerHTML = app.classList.contains('sidebar-hidden') ? '&#x25B6;' : '&#x25C0;';
+}
+
+function switchView(view) {
+    if (view === currentView) return;
+    currentView = view;
+
+    // Exit attack path and sim modes when switching to heatmap
+    if (view === 'heatmap') {
+        if (attackPathMode) toggleAttackPathMode();
+        if (simMode) toggleSimMode();
+    }
+
+    document.getElementById('viewGraph').classList.toggle('active', view === 'graph');
+    document.getElementById('viewHeatmap').classList.toggle('active', view === 'heatmap');
+    document.getElementById('graphSvg').style.display = view === 'graph' ? '' : 'none';
+    document.getElementById('heatmapSvg').style.display = view === 'heatmap' ? '' : 'none';
+    document.getElementById('graphHint').style.display = view === 'graph' ? '' : 'none';
+
+    if (view === 'heatmap') renderHeatmap();
+}
+
+function computeHeatmapData() {
+    const quarters = [];
+    for (let y = 2022; y <= 2026; y++) {
+        for (let q = 1; q <= 4; q++) {
+            if (y === 2022 && q < 4) continue;
+            if (y === 2026 && q > 1) continue;
+            quarters.push({ year: y, quarter: q, label: 'Q' + q + "'" + String(y).slice(2) });
+        }
+    }
+
+    const grid = {};
+    NODES.forEach(function(node) {
+        grid[node.id] = {};
+        quarters.forEach(function(q) {
+            let count = 0;
+            (node.cves || []).forEach(function(cve) {
+                var m = cve.id.match(/CVE-(\d{4})/);
+                if (m) {
+                    var cveYear = parseInt(m[1]);
+                    if (cveYear === q.year && q.quarter === 1) count++;
+                }
+            });
+            (node.attacks || []).forEach(function(a) {
+                var parts = a.date.split('-');
+                var aYear = parseInt(parts[0]);
+                var aMonth = parts[1] ? parseInt(parts[1]) : 1;
+                var aQuarter = Math.ceil(aMonth / 3);
+                if (aYear === q.year && aQuarter === q.quarter) count++;
+            });
+            INCIDENTS.forEach(function(inc) {
+                if (!inc.nodes.includes(node.id)) return;
+                var parts = inc.date.split('-');
+                var iYear = parseInt(parts[0]);
+                var iMonth = parts[1] ? parseInt(parts[1]) : 1;
+                var iQuarter = Math.ceil(iMonth / 3);
+                if (iYear === q.year && iQuarter === q.quarter) count++;
+            });
+            grid[node.id][q.year + '-Q' + q.quarter] = count;
+        });
+    });
+
+    return { quarters: quarters, grid: grid };
+}
+
+var heatmapZoom = null;
+
+function renderHeatmap() {
+    var hmSvg = d3.select('#heatmapSvg');
+    hmSvg.selectAll('*').remove();
+
+    var data = computeHeatmapData();
+    var quarters = data.quarters;
+    var grid = data.grid;
+
+    // Filter to nodes with events and matching current filters
+    var activeNodes = NODES.filter(function(n) {
+        if (!activeFilters.has(n.layer)) return false;
+        return Object.values(grid[n.id]).some(function(v) { return v > 0; });
+    }).sort(function(a, b) {
+        var ld = LAYERS[a.layer].order - LAYERS[b.layer].order;
+        if (ld !== 0) return ld;
+        return b.risk - a.risk;
+    });
+
+    if (activeNodes.length === 0) {
+        hmSvg.append('text').attr('x', 200).attr('y', 80).attr('fill', '#556').attr('font-size', 14)
+            .text('No events to display. Adjust filters.');
+        return;
+    }
+
+    var cellW = 56, cellH = 32, cellGap = 3;
+    var labelW = 160, headerH = 60, layerGapH = 20;
+    var riskBarW = 40;
+
+    // Pre-compute layer groups with gap rows
+    var rows = [];
+    var prevLayer = null;
+    activeNodes.forEach(function(node) {
+        if (node.layer !== prevLayer) {
+            rows.push({ type: 'layer', layer: node.layer });
+            prevLayer = node.layer;
+        }
+        rows.push({ type: 'node', node: node });
+    });
+
+    var totalH = headerH;
+    rows.forEach(function(r) { totalH += r.type === 'layer' ? layerGapH : cellH; });
+    totalH += 50; // legend
+
+    var gridW = quarters.length * cellW;
+    var W = labelW + riskBarW + gridW + 30;
+    var H = totalH;
+
+    // Set up zoom + pan
+    var hmG = hmSvg.append('g');
+    heatmapZoom = d3.zoom()
+        .scaleExtent([0.3, 6])
+        .on('zoom', function(event) { hmG.attr('transform', event.transform); });
+    hmSvg.call(heatmapZoom);
+
+    // Fit to container
+    var container = document.getElementById('main');
+    var cW = container.clientWidth;
+    var cH = container.clientHeight;
+    var initScale = Math.min(cW / (W + 20), cH / (H + 20), 2.0) * 0.92;
+    var initX = (cW - W * initScale) / 2;
+    var initY = Math.max((cH - H * initScale) / 2, 8);
+    hmSvg.call(heatmapZoom.transform, d3.zoomIdentity.translate(initX, initY).scale(initScale));
+
+    var maxVal = 0;
+    activeNodes.forEach(function(n) {
+        var mx = d3.max(Object.values(grid[n.id]));
+        if (mx > maxVal) maxVal = mx;
+    });
+    if (maxVal === 0) maxVal = 1;
+
+    var colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxVal + 0.5]);
+    var gridX0 = labelW + riskBarW;
+
+    // ── Year headers ──
+    var yearGroups = {};
+    quarters.forEach(function(q, qi) {
+        if (!yearGroups[q.year]) yearGroups[q.year] = { start: qi, count: 0 };
+        yearGroups[q.year].count++;
+    });
+    Object.keys(yearGroups).forEach(function(yr) {
+        var yg = yearGroups[yr];
+        var cx = gridX0 + (yg.start + yg.count / 2) * cellW;
+        hmG.append('text').attr('class', 'hm-year-label')
+            .attr('x', cx).attr('y', 16).text(yr);
+        // year separator line
+        if (yg.start > 0) {
+            hmG.append('line')
+                .attr('x1', gridX0 + yg.start * cellW - 1).attr('x2', gridX0 + yg.start * cellW - 1)
+                .attr('y1', 24).attr('y2', H - 50)
+                .attr('stroke', 'rgba(255,255,255,0.06)').attr('stroke-width', 1);
+        }
+    });
+
+    // ── Quarter sub-headers ──
+    quarters.forEach(function(q, qi) {
+        var isActive = activeYearFilter === null || activeYearFilter === q.year;
+        hmG.append('text').attr('class', 'heatmap-quarter-label')
+            .attr('x', gridX0 + qi * cellW + cellW / 2)
+            .attr('y', headerH - 16)
+            .attr('opacity', isActive ? 1 : 0.3)
+            .text('Q' + q.quarter);
+    });
+
+    // ── Header separator ──
+    hmG.append('line')
+        .attr('x1', labelW).attr('x2', gridX0 + gridW)
+        .attr('y1', headerH - 6).attr('y2', headerH - 6)
+        .attr('stroke', 'rgba(255,255,255,0.08)').attr('stroke-width', 1);
+
+    // "Risk" column label
+    hmG.append('text')
+        .attr('x', labelW + riskBarW / 2).attr('y', headerH - 16)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 8).attr('fill', '#556').attr('font-family', "'JetBrains Mono', monospace")
+        .attr('text-transform', 'uppercase').attr('letter-spacing', '1px')
+        .text('RISK');
+
+    // ── Rows ──
+    var curY = headerH;
+    rows.forEach(function(row) {
+        if (row.type === 'layer') {
+            // Layer group header
+            var lc = LAYERS[row.layer].color;
+            hmG.append('rect').attr('class', 'hm-layer-bg')
+                .attr('x', 0).attr('y', curY)
+                .attr('width', W).attr('height', layerGapH)
+                .attr('fill', lc);
+            hmG.append('text').attr('class', 'heatmap-layer-label')
+                .attr('x', 8).attr('y', curY + layerGapH / 2 + 3)
+                .attr('fill', lc)
+                .text(LAYERS[row.layer].name.toUpperCase());
+            curY += layerGapH;
+            return;
+        }
+
+        var node = row.node;
+        var y = curY;
+
+        // Invisible wide hover rect for row highlight
+        hmG.append('rect').attr('class', 'hm-row-hover')
+            .attr('x', 0).attr('y', y).attr('width', W).attr('height', cellH);
+
+        // Alternating row tint
+        var rowIdx = activeNodes.indexOf(node);
+        if (rowIdx % 2 === 0) {
+            hmG.append('rect')
+                .attr('x', gridX0).attr('y', y)
+                .attr('width', gridW).attr('height', cellH)
+                .attr('fill', 'rgba(255,255,255,0.015)');
+        }
+
+        // Node label with layer-colored dot
+        var dotR = 4;
+        hmG.append('circle')
+            .attr('cx', labelW - 18 - dotR).attr('cy', y + cellH / 2)
+            .attr('r', dotR).attr('fill', LAYERS[node.layer].color).attr('opacity', 0.7);
+
+        hmG.append('text').attr('class', 'heatmap-label')
+            .attr('x', labelW - 26 - dotR * 2).attr('y', y + cellH / 2 + 4)
+            .attr('text-anchor', 'end')
+            .text(node.label.length > 18 ? node.label.substring(0, 17) + '\u2026' : node.label)
+            .on('click', function() { onHeatmapLabelClick(node.id); })
+            .append('title').text(node.label + ' \u2014 risk: ' + node.risk + '/100');
+
+        // Risk mini-bar
+        var riskW = (node.risk / 100) * (riskBarW - 8);
+        var riskColor = node.risk >= 85 ? '#ff1744' : node.risk >= 65 ? '#ff9100' : '#ffea00';
+        hmG.append('rect').attr('class', 'hm-risk-bar')
+            .attr('x', labelW + 2).attr('y', y + cellH / 2 - 3)
+            .attr('width', riskW).attr('height', 6)
+            .attr('rx', 3).attr('fill', riskColor);
+
+        // Grid cells — draw bg for all, colored for events
+        quarters.forEach(function(q, qi) {
+            var cx = gridX0 + qi * cellW;
+            var key = q.year + '-Q' + q.quarter;
+            var val = grid[node.id][key] || 0;
+            var isActiveQ = activeYearFilter === null || activeYearFilter === q.year;
+
+            // Background cell (subtle grid)
+            hmG.append('rect').attr('class', 'hm-bg-cell')
+                .attr('x', cx + cellGap / 2).attr('y', y + cellGap / 2)
+                .attr('width', cellW - cellGap).attr('height', cellH - cellGap)
+                .attr('rx', 4)
+                .attr('opacity', isActiveQ ? 1 : 0.3);
+
+            if (val > 0) {
+                hmG.append('rect').attr('class', 'heatmap-cell')
+                    .attr('x', cx + cellGap / 2).attr('y', y + cellGap / 2)
+                    .attr('width', cellW - cellGap).attr('height', cellH - cellGap)
+                    .attr('rx', 4)
+                    .attr('fill', colorScale(val))
+                    .attr('opacity', isActiveQ ? 0.9 : 0.2)
+                    .on('click', function() { onHeatmapCellClick(node.id, q); })
+                    .on('mouseenter', function(event) { onHeatmapCellHover(event, node, q, val); })
+                    .on('mouseleave', function() {
+                        document.getElementById('heatmapTooltip').classList.remove('visible');
+                    });
+
+                // Count number inside cell
+                hmG.append('text').attr('class', 'hm-cell-text')
+                    .attr('x', cx + cellW / 2).attr('y', y + cellH / 2)
+                    .attr('opacity', isActiveQ ? 0.95 : 0.3)
+                    .text(val);
+            }
+        });
+
+        curY += cellH;
+    });
+
+    // ── Color legend ──
+    var legendY = curY + 16;
+    var legendX = gridX0;
+    var legendW = 160, legendH = 10, legendSteps = 40;
+    hmG.append('text').attr('x', legendX).attr('y', legendY - 4)
+        .attr('font-size', 9).attr('fill', '#556').attr('font-family', "'JetBrains Mono', monospace")
+        .text('Events');
+    for (var li = 0; li < legendSteps; li++) {
+        hmG.append('rect')
+            .attr('x', legendX + li * (legendW / legendSteps))
+            .attr('y', legendY)
+            .attr('width', legendW / legendSteps + 0.5)
+            .attr('height', legendH)
+            .attr('fill', colorScale(li / legendSteps * maxVal));
+    }
+    hmG.append('text').attr('class', 'hm-legend-label').attr('x', legendX).attr('y', legendY + legendH + 10).text('0');
+    hmG.append('text').attr('class', 'hm-legend-label').attr('x', legendX + legendW).attr('y', legendY + legendH + 10).text(maxVal);
+}
+
+function onHeatmapCellClick(nodeId, quarter) {
+    var node = nodeMap[nodeId];
+    if (node) showNodeDetail(node);
+}
+
+function onHeatmapCellHover(event, node, quarter, count) {
+    var tooltip = document.getElementById('heatmapTooltip');
+    var key = quarter.year + '-Q' + quarter.quarter;
+
+    // Gather CVE and incident details for this node + quarter
+    var details = [];
+    (node.cves || []).forEach(function(cve) {
+        var m = cve.id.match(/CVE-(\d{4})/);
+        if (m && parseInt(m[1]) === quarter.year && quarter.quarter === 1) {
+            details.push('<span style="color:#ff9100">' + cve.id + '</span> (CVSS ' + cve.cvss + ')');
+        }
+    });
+    (node.attacks || []).forEach(function(a) {
+        var parts = a.date.split('-');
+        var aQ = Math.ceil((parts[1] ? parseInt(parts[1]) : 1) / 3);
+        if (parseInt(parts[0]) === quarter.year && aQ === quarter.quarter) {
+            details.push('<span style="color:#ff1744">' + a.label.substring(0, 50) + '</span>');
+        }
+    });
+    INCIDENTS.forEach(function(inc) {
+        if (!inc.nodes.includes(node.id)) return;
+        var parts = inc.date.split('-');
+        var iQ = Math.ceil((parts[1] ? parseInt(parts[1]) : 1) / 3);
+        if (parseInt(parts[0]) === quarter.year && iQ === quarter.quarter) {
+            details.push('<span style="color:#d500f9">' + inc.label.substring(0, 50) + '</span>');
+        }
+    });
+
+    tooltip.innerHTML = '<div style="font-weight:600;color:' + LAYERS[node.layer].color + ';margin-bottom:4px">' + node.label + '</div>' +
+        '<div style="font-size:10px;color:#889;margin-bottom:4px">' + quarter.label + ' \u2014 ' + count + ' event' + (count > 1 ? 's' : '') + '</div>' +
+        details.join('<br>');
+    tooltip.classList.add('visible');
+    tooltip.style.left = (event.clientX + 12) + 'px';
+    tooltip.style.top = (event.clientY - 10) + 'px';
+}
+
+function onHeatmapLabelClick(nodeId) {
+    switchView('graph');
+    setTimeout(function() { focusNodeById(nodeId); }, 100);
+}
+
+// ══════════════════════════════════════════════════
+// LLM CHAT INTERFACE
+// ══════════════════════════════════════════════════
+
+function initChat() {
+    var input = document.getElementById('chatInput');
+    if (!input) return;
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+        if (e.key === 'Escape') {
+            var chat = document.getElementById('llm-chat');
+            if (!chat.classList.contains('collapsed')) toggleChat();
+        }
+    });
+}
+
+function toggleChat() {
+    var chat = document.getElementById('llm-chat');
+    var btn = document.getElementById('chatMinBtn');
+    chat.classList.toggle('collapsed');
+    btn.innerHTML = chat.classList.contains('collapsed') ? '\u25BC' : '\u25B2';
+}
+
+function openSettings() {
+    var overlay = document.getElementById('settingsOverlay');
+    var input = document.getElementById('groqKeyInput');
+    input.value = localStorage.getItem('groq_api_key') || '';
+    overlay.classList.add('visible');
+}
+
+function closeSettings() {
+    document.getElementById('settingsOverlay').classList.remove('visible');
+}
+
+function saveSettings() {
+    var key = document.getElementById('groqKeyInput').value.trim();
+    if (key) {
+        localStorage.setItem('groq_api_key', key);
+    } else {
+        localStorage.removeItem('groq_api_key');
+    }
+    closeSettings();
+}
+
+function buildSystemPrompt() {
+    var nodesSummary = NODES.map(function(n) {
+        return {
+            id: n.id, label: n.label, layer: n.layer,
+            risk: n.risk, downloads: n.downloads,
+            cveCount: n.cves ? n.cves.length : 0,
+            attackCount: n.attacks ? n.attacks.length : 0,
+            maintainers: n.maintainers,
+            deps: adjForward[n.id] ? adjForward[n.id].length : 0,
+            dependents: adjReverse[n.id] ? adjReverse[n.id].length : 0,
+        };
+    });
+
+    var incidentsSummary = INCIDENTS.map(function(i) {
+        return { id: i.id, date: i.date, label: i.label, nodes: i.nodes };
+    });
+
+    return 'You are an AI security analyst assistant for an interactive ML Supply Chain Dependency Map.\n\n' +
+        '## Your Knowledge Base\n' +
+        'You have access to a graph of ' + NODES.length + ' packages in the ML/AI ecosystem with ' + EDGES.length + ' dependency edges and ' + INCIDENTS.length + ' real-world security incidents.\n\n' +
+        '## Node Data (JSON):\n' + JSON.stringify(nodesSummary) + '\n\n' +
+        '## Incidents (JSON):\n' + JSON.stringify(incidentsSummary) + '\n\n' +
+        '## MITRE ATLAS Techniques You Know:\n' +
+        Object.values(ATLAS_TECHNIQUES).map(function(t) { return '- ' + t.id + ': ' + t.name; }).join('\n') + '\n\n' +
+        '## Your Capabilities\n' +
+        '1. Analyze attack paths between nodes\n' +
+        '2. Identify highest-risk components and why\n' +
+        '3. Map threats to MITRE ATLAS techniques\n' +
+        '4. Reference real incidents from the data\n' +
+        '5. Suggest which nodes to patch/monitor first\n\n' +
+        '## Response Format\n' +
+        '- Be concise (3-5 sentences for simple questions)\n' +
+        '- Reference specific node IDs, CVE IDs, and incident IDs\n' +
+        '- When you mention a node, wrap it in brackets: [numpy], [vLLM]\n' +
+        '- When you mention an ATLAS technique, format as: AML.T0010\n' +
+        '- When suggesting to highlight nodes, output: HIGHLIGHT:[node1,node2,node3]\n' +
+        '- When suggesting to run a simulation, output: SIMULATE:[nodeId]\n' +
+        '- When suggesting to focus on a node, output: FOCUS:[nodeId]\n\n' +
+        '## Tone\n' +
+        'Technical, precise, direct. No fluff. Think threat intelligence analyst writing a brief.';
+}
+
+async function queryLLM(userMessage) {
+    var apiKey = localStorage.getItem('groq_api_key');
+    if (!apiKey) {
+        return { error: 'No API key. Open settings (\u2699) to enter your Groq key.' };
+    }
+
+    var messages = [
+        { role: 'system', content: buildSystemPrompt() }
+    ].concat(chatHistory.slice(-6)).concat([
+        { role: 'user', content: userMessage }
+    ]);
+
+    try {
+        var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + apiKey,
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: messages,
+                max_tokens: 1024,
+                temperature: 0.3,
+            }),
+        });
+
+        if (!response.ok) {
+            var err = await response.json().catch(function() { return {}; });
+            return { error: 'API error: ' + ((err.error && err.error.message) || response.status) };
+        }
+
+        var responseData = await response.json();
+        var reply = responseData.choices[0].message.content;
+        parseAndExecuteActions(reply);
+        return { text: reply };
+    } catch (err) {
+        return { error: 'Network error: ' + err.message };
+    }
+}
+
+async function sendChatMessage() {
+    var input = document.getElementById('chatInput');
+    var msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+
+    // Expand chat if collapsed
+    var chat = document.getElementById('llm-chat');
+    if (chat.classList.contains('collapsed')) toggleChat();
+
+    addChatBubble('user', msg);
+    chatHistory.push({ role: 'user', content: msg });
+
+    // Show typing indicator
+    var msgsEl = document.getElementById('chatMessages');
+    var typingEl = document.createElement('div');
+    typingEl.className = 'chat-msg ai';
+    typingEl.id = 'chatTyping';
+    typingEl.innerHTML = '<div class="msg-bubble chat-typing"><span></span><span></span><span></span></div>';
+    msgsEl.appendChild(typingEl);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    var result = await queryLLM(msg);
+
+    // Remove typing indicator
+    var ti = document.getElementById('chatTyping');
+    if (ti) ti.remove();
+
+    if (result.error) {
+        addChatBubble('error', result.error);
+    } else {
+        addChatBubble('ai', result.text);
+        chatHistory.push({ role: 'assistant', content: result.text });
+    }
+}
+
+function addChatBubble(role, text) {
+    var msgsEl = document.getElementById('chatMessages');
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    if (role === 'ai') {
+        div.innerHTML = '<div class="msg-bubble">' + formatAIResponse(text) + '</div>';
+    } else if (role === 'error') {
+        div.innerHTML = '<div class="msg-bubble">' + text + '</div>';
+    } else {
+        div.innerHTML = '<div class="msg-bubble">' + escapeHtml(text) + '</div>';
+    }
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function parseAndExecuteActions(text) {
+    var highlightMatch = text.match(/HIGHLIGHT:\[([^\]]+)\]/);
+    if (highlightMatch) {
+        var nodeIds = highlightMatch[1].split(',').map(function(s) { return s.trim(); });
+        highlightNodeGroup(nodeIds);
+    }
+
+    var simMatch = text.match(/SIMULATE:\[([^\]]+)\]/);
+    if (simMatch) {
+        var simNodeId = simMatch[1].trim();
+        if (!simMode) toggleSimMode();
+        var simNodeData = NODES.find(function(n) { return n.id === simNodeId; });
+        if (simNodeData) runCompromiseSimulation(simNodeData);
+    }
+
+    var focusMatch = text.match(/FOCUS:\[([^\]]+)\]/);
+    if (focusMatch) {
+        focusNodeById(focusMatch[1].trim());
+    }
+}
+
+function formatAIResponse(text) {
+    var clean = text
+        .replace(/HIGHLIGHT:\[[^\]]+\]/g, '')
+        .replace(/SIMULATE:\[[^\]]+\]/g, '')
+        .replace(/FOCUS:\[[^\]]+\]/g, '')
+        .trim();
+
+    // Escape HTML first
+    clean = escapeHtml(clean);
+
+    // Convert [nodeName] to clickable links
+    clean = clean.replace(/\[([^\]]+)\]/g, function(match, name) {
+        var node = NODES.find(function(n) {
+            return n.label.toLowerCase() === name.toLowerCase() ||
+                   n.id.toLowerCase() === name.toLowerCase();
+        });
+        if (node) {
+            return '<span class="chat-node-link" onclick="focusNodeById(\'' + node.id + '\')">' + node.label + '</span>';
+        }
+        return match;
+    });
+
+    // Convert AML.TXXXX to styled tags
+    clean = clean.replace(/(AML\.T\d{4}(?:\.\d{3})?)/g, function(match) {
+        var tech = ATLAS_TECHNIQUES[match];
+        if (tech) {
+            return '<a class="chat-atlas-tag" href="' + tech.url + '" target="_blank" title="' + tech.name + '">' + match + '</a>';
+        }
+        return '<span class="chat-atlas-tag">' + match + '</span>';
+    });
+
+    // Convert newlines to <br>
+    clean = clean.replace(/\n/g, '<br>');
+
+    return clean;
+}
 </script>
 </body>
 </html>
