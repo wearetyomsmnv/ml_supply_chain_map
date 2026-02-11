@@ -2239,6 +2239,12 @@ const EDGES = [
   { source: 'anythingllm',    target: 'openai-sdk' },
   { source: 'anythingllm',    target: 'langchain' },
   { source: 'anythingllm',    target: 'hf-hub' },
+  // ── Fix: isolated nodes ──
+  { source: 'litellm',        target: 'google-genai' },  // litellm proxies to Google GenAI
+  { source: 'langchain',      target: 'google-genai' },  // langchain-google-genai integration
+  { source: 'transformers',   target: 'sentencepiece' }, // tokenizer backend for LLaMA, T5, etc.
+  { source: 'llama-cpp',      target: 'sentencepiece' }, // GGUF tokenization
+  { source: 'setuptools',     target: 'numpy' },          // build dependency
 ];
 
 const INCIDENTS = [
