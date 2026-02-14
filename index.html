@@ -220,12 +220,77 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
   background: #111820; border: 1px solid rgba(255,255,255,0.05);
   border-radius: 6px; padding: 8px 10px; margin-bottom: 6px;
 }
-.cve-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff9100; font-weight: 500; }
+.cve-id {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #ff9100; font-weight: 500;
+  display: flex; align-items: center; flex-wrap: nowrap; gap: 4px;
+}
 .cve-desc { font-size: 11px; color: #889; margin-top: 2px; }
 .cve-cvss {
   font-family: 'JetBrains Mono', monospace; font-size: 10px;
   display: inline-block; padding: 1px 6px; border-radius: 3px; margin-top: 3px;
 }
+
+/* ── OSV Integration ── */
+.cve-osv-spinner {
+  display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(0,229,255,0.2);
+  border-top-color: #00e5ff; border-radius: 50%; animation: osvSpin 0.8s linear infinite;
+  margin-left: 6px; vertical-align: middle;
+}
+@keyframes osvSpin { to { transform: rotate(360deg); } }
+
+.cve-fix-badge {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 1px 7px; border-radius: 3px; margin-left: 6px; font-weight: 600;
+  vertical-align: middle; letter-spacing: 0.5px;
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cve-fix-available {
+  background: rgba(118,255,3,0.15); color: #76ff03; border: 1px solid rgba(118,255,3,0.3);
+}
+.cve-fix-none {
+  background: rgba(255,23,68,0.15); color: #ff1744; border: 1px solid rgba(255,23,68,0.3);
+}
+
+.cve-osv-details { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.04); }
+.cve-osv-details:empty { display: none; }
+.cve-osv-summary {
+  font-size: 11px; color: #99a; line-height: 1.4; margin-bottom: 4px;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.cve-osv-aliases { font-size: 10px; color: #667; margin-bottom: 4px; }
+.cve-osv-refs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.cve-osv-ref-link {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  background: rgba(0,229,255,0.08); color: #00e5ff; text-decoration: none;
+  border: 1px solid rgba(0,229,255,0.15); transition: all 0.2s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cve-osv-ref-link:hover { background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.3); }
+.cve-osv-error { font-size: 10px; color: #ff1744; margin-top: 4px; font-style: italic; }
+
+.fix-summary-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; margin: 8px 0; border-radius: 6px;
+  background: #111820; border: 1px solid rgba(255,255,255,0.05);
+}
+.fix-summary-label { font-size: 10px; color: #667; text-transform: uppercase; letter-spacing: 1px; }
+.fix-summary-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.fix-summary-good { color: #76ff03; }
+.fix-summary-warn { color: #ff9100; }
+.fix-summary-bad { color: #ff1744; }
+
+.osv-extra-cve-item {
+  background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.1);
+  border-radius: 6px; padding: 8px 10px; margin-bottom: 6px;
+}
+.osv-extra-cve-id {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00e5ff; font-weight: 500;
+}
+
+.vuln-ring { fill: none; stroke-dasharray: 4 3; }
+.vuln-ring-unfixed { animation: vulnPulse 2.5s ease-in-out infinite; }
+@keyframes vulnPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+
 .attack-item {
   font-size: 12px; color: #aab; padding: 4px 0;
   border-bottom: 1px solid rgba(255,255,255,0.03);
@@ -1110,6 +1175,14 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0e17; c
       <div class="blast-radius-text" id="detailBlast"></div>
       <div class="detail-section-title" id="cveSectionTitle" style="display:none">CVE / Vulnerabilities</div>
       <div id="detailCVEs"></div>
+      <div class="fix-summary-row" id="fixSummaryRow" style="display:none">
+        <span class="fix-summary-label">Fix Coverage</span>
+        <span class="fix-summary-value" id="fixSummaryValue"></span>
+      </div>
+      <div class="detail-section-title" id="osvExtraSectionTitle" style="display:none">
+        Additional OSV Vulnerabilities
+      </div>
+      <div id="osvExtraCVEs"></div>
       <div class="detail-section-title" id="attackSectionTitle" style="display:none">Attacks / Incidents</div>
       <div id="detailAttacks"></div>
       <div class="detail-section-title" id="threatSectionTitle" style="display:none">Threat Actors</div>
@@ -2763,6 +2836,20 @@ const ATLAS_CASE_STUDY_MAP = {
 // ══════════════════════════════════════════════════
 // GLOBALS
 // ══════════════════════════════════════════════════
+const osvCache = {};
+const osvPackageCache = {};
+const OSV_API_BASE = 'https://api.osv.dev/v1';
+const OSV_CACHE_TTL = 30 * 60 * 1000;
+
+const NODE_TO_PYPI = {
+  'pytorch': 'torch', 'hf-hub': 'huggingface-hub',
+  'llama-cpp': 'llama-cpp-python', 'openai-sdk': 'openai',
+  'anthropic-sdk': 'anthropic', 'google-genai': 'google-genai',
+  'mistralai-sdk': 'mistralai', 'cohere-sdk': 'cohere',
+  'gigachat-sdk': 'gigachat', 'groq-sdk': 'groq',
+  'cuda': null, 'tsmc': null, 'asml': null, 'amd-rocm': null, 'pgvector': null,
+};
+
 let simulation, svg, g, linkGroup, nodeGroup, hullGroup, arrowDefs, graphZoom;
 let simMode = false;
 let attackPathMode = false;
@@ -2937,6 +3024,14 @@ function buildGraph() {
   critMerge.append('feMergeNode').attr('in', 'blur');
   critMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
+  // Vulnerability ring glow
+  const vulnGlow = defs.append('filter').attr('id', 'glow-vuln')
+    .attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
+  vulnGlow.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur');
+  const vulnMerge = vulnGlow.append('feMerge');
+  vulnMerge.append('feMergeNode').attr('in', 'blur');
+  vulnMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
   // Arrow marker
   defs.append('marker')
     .attr('id', 'arrowhead')
@@ -3020,6 +3115,7 @@ function buildGraph() {
     const el = d3.select(this);
     const layerColor = LAYERS[d.layer].color;
     const glowFilter = d.risk >= 85 ? 'url(#glow-critical)' : `url(#glow-${d.layer})`;
+    const cveBonus = Math.min(d.cves.length * 0.04, 0.20);
 
     if (d.shape === 'hex') {
       const r = d.r;
@@ -3030,14 +3126,14 @@ function buildGraph() {
       el.append('polygon')
         .attr('class', 'node-hex')
         .attr('points', hex.map(p => p.join(',')).join(' '))
-        .attr('fill', hexToRGBA(layerColor, 0.15))
+        .attr('fill', hexToRGBA(layerColor, 0.15 + cveBonus))
         .attr('stroke', layerColor)
         .style('filter', glowFilter);
     } else {
       el.append('circle')
         .attr('class', 'node-circle')
         .attr('r', d.r)
-        .attr('fill', hexToRGBA(layerColor, 0.12))
+        .attr('fill', hexToRGBA(layerColor, 0.12 + cveBonus))
         .attr('stroke', layerColor)
         .style('filter', glowFilter);
     }
@@ -3046,6 +3142,35 @@ function buildGraph() {
       .attr('class', 'node-label')
       .attr('dy', d.r + 14)
       .text(d.label);
+
+    // Vulnerability depth ring
+    if (d.cves.length > 0) {
+      const vulnCount = d.cves.length;
+      const maxCVSS = d3.max(d.cves, c => c.cvss) || 0;
+      const ringR = d.r + 6 + Math.min(vulnCount, 9) * 2;
+      const ringColor = maxCVSS >= 9 ? '#ff1744' : maxCVSS >= 7 ? '#ff9100' : '#ffea00';
+      const ringWidth = 1.5 + Math.min(vulnCount, 9) * 0.3;
+
+      el.append('circle')
+        .attr('class', 'vuln-ring vuln-ring-unfixed')
+        .attr('r', ringR)
+        .attr('stroke', ringColor)
+        .attr('stroke-width', ringWidth)
+        .attr('stroke-dasharray', '4 3')
+        .style('filter', 'url(#glow-vuln)');
+
+      if (vulnCount >= 2) {
+        el.append('text')
+          .attr('class', 'node-label')
+          .attr('dy', -(d.r + 8))
+          .attr('text-anchor', 'middle')
+          .attr('fill', ringColor)
+          .attr('font-size', '9px')
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('font-weight', '600')
+          .text(`${vulnCount} CVE`);
+      }
+    }
   });
 
   // Force simulation
@@ -3194,9 +3319,212 @@ function onNodeClick(event, d) {
   showNodeDetail(d);
 }
 
+// ══════════════════════════════════════════════════
+// OSV.dev API INTEGRATION
+// ══════════════════════════════════════════════════
+
+async function fetchOsvVuln(cveId) {
+  const cached = osvCache[cveId];
+  if (cached && Date.now() - cached.timestamp < OSV_CACHE_TTL) {
+    if (cached.error) throw cached.error;
+    return cached.data;
+  }
+  try {
+    const resp = await fetch(`${OSV_API_BASE}/vulns/${encodeURIComponent(cveId)}`);
+    if (resp.status === 404) {
+      const err = new Error('Not found in OSV');
+      osvCache[cveId] = { data: null, timestamp: Date.now(), error: err };
+      throw err;
+    }
+    if (!resp.ok) throw new Error(`OSV API error: ${resp.status}`);
+    const data = await resp.json();
+    osvCache[cveId] = { data, timestamp: Date.now(), error: null };
+    return data;
+  } catch (e) {
+    if (!osvCache[cveId]) osvCache[cveId] = { data: null, timestamp: Date.now(), error: e };
+    throw e;
+  }
+}
+
+async function fetchOsvPackageVulns(nodeId) {
+  const cached = osvPackageCache[nodeId];
+  if (cached && Date.now() - cached.timestamp < OSV_CACHE_TTL) {
+    if (cached.error) throw cached.error;
+    return cached.vulns;
+  }
+  const pypiName = NODE_TO_PYPI.hasOwnProperty(nodeId) ? NODE_TO_PYPI[nodeId] : nodeId;
+  if (pypiName === null) {
+    osvPackageCache[nodeId] = { vulns: [], timestamp: Date.now(), error: null };
+    return [];
+  }
+  try {
+    const resp = await fetch(`${OSV_API_BASE}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ package: { name: pypiName, ecosystem: 'PyPI' } })
+    });
+    if (!resp.ok) throw new Error(`OSV query error: ${resp.status}`);
+    const data = await resp.json();
+    const vulns = data.vulns || [];
+    osvPackageCache[nodeId] = { vulns, timestamp: Date.now(), error: null };
+    return vulns;
+  } catch (e) {
+    if (!osvPackageCache[nodeId]) osvPackageCache[nodeId] = { vulns: [], timestamp: Date.now(), error: e };
+    throw e;
+  }
+}
+
+function extractFixInfo(osvData) {
+  const fixVersions = [];
+  let hasFix = false;
+  if (osvData && osvData.affected) {
+    osvData.affected.forEach(aff => {
+      if (aff.ranges) {
+        aff.ranges.forEach(range => {
+          if (range.events) {
+            range.events.forEach(ev => {
+              if (ev.fixed) {
+                hasFix = true;
+                if (!fixVersions.includes(ev.fixed)) fixVersions.push(ev.fixed);
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+  return { hasFix, fixVersions };
+}
+
+function refTypeLabel(type) {
+  const labels = {
+    'ADVISORY': 'Advisory', 'ARTICLE': 'Article', 'DETECTION': 'Detection',
+    'DISCUSSION': 'Discussion', 'REPORT': 'Report', 'FIX': 'Fix',
+    'INTRODUCED': 'Intro', 'PACKAGE': 'Pkg', 'EVIDENCE': 'Evidence',
+    'WEB': 'Web', 'GIT': 'Git'
+  };
+  return labels[type] || type || 'Link';
+}
+
+function renderCveWithOsv(cve, container) {
+  const cvssColor = cve.cvss >= 9 ? '#ff1744' : cve.cvss >= 7 ? '#ff9100' : '#ffea00';
+  const itemEl = document.createElement('div');
+  itemEl.className = 'cve-item';
+  itemEl.innerHTML = `
+    <div class="cve-id">${cve.id} <span class="cve-osv-spinner" id="osv-spin-${cve.id.replace(/[^a-zA-Z0-9]/g, '_')}"></span></div>
+    <div class="cve-desc">${cve.desc}</div>
+    <span class="cve-cvss" style="background:${hexToRGBA(cvssColor, 0.2)};color:${cvssColor};border:1px solid ${hexToRGBA(cvssColor, 0.3)}">CVSS ${cve.cvss}</span>
+    <div class="cve-osv-details" id="osv-details-${cve.id.replace(/[^a-zA-Z0-9]/g, '_')}"></div>
+  `;
+  container.appendChild(itemEl);
+
+  const spinId = `osv-spin-${cve.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  const detailId = `osv-details-${cve.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+  const fixPromise = fetchOsvVuln(cve.id).then(osvData => {
+    const spinner = document.getElementById(spinId);
+    if (spinner) spinner.remove();
+
+    const { hasFix, fixVersions } = extractFixInfo(osvData);
+    const idEl = itemEl.querySelector('.cve-id');
+    if (hasFix) {
+      let ver = fixVersions[0];
+      // Truncate commit hashes (40 hex chars) to short form
+      if (/^[0-9a-f]{20,}$/i.test(ver)) ver = ver.substring(0, 7);
+      idEl.insertAdjacentHTML('beforeend', `<span class="cve-fix-badge cve-fix-available" title="${fixVersions[0]}">FIX ${ver}</span>`);
+    } else {
+      idEl.insertAdjacentHTML('beforeend', `<span class="cve-fix-badge cve-fix-none">NO FIX</span>`);
+    }
+
+    const detailEl = document.getElementById(detailId);
+    if (detailEl && osvData) {
+      let html = '';
+      if (osvData.summary) html += `<div class="cve-osv-summary">${osvData.summary}</div>`;
+      if (osvData.aliases && osvData.aliases.length > 0) {
+        html += `<div class="cve-osv-aliases">Aliases: ${osvData.aliases.join(', ')}</div>`;
+      }
+      if (osvData.references && osvData.references.length > 0) {
+        html += '<div class="cve-osv-refs">';
+        const seen = new Set();
+        let refCount = 0;
+        for (const ref of osvData.references) {
+          const label = refTypeLabel(ref.type);
+          if (seen.has(label) && label === 'Advisory') continue;
+          seen.add(label);
+          html += `<a class="cve-osv-ref-link" href="${ref.url}" target="_blank" rel="noopener">${label}</a>`;
+          if (++refCount >= 4) break;
+        }
+        html += '</div>';
+      }
+      detailEl.innerHTML = html;
+    }
+    return { hasFix, fixVersions };
+  }).catch(err => {
+    const spinner = document.getElementById(spinId);
+    if (spinner) spinner.remove();
+    const detailEl = document.getElementById(detailId);
+    if (detailEl) detailEl.innerHTML = `<div class="cve-osv-error">${err.message}</div>`;
+    return { hasFix: false, fixVersions: [] };
+  });
+
+  return fixPromise;
+}
+
+async function enrichDetailWithOsvPackageQuery(nodeId, existingCveIds, container) {
+  const titleEl = document.getElementById('osvExtraSectionTitle');
+  container.innerHTML = '';
+  titleEl.style.display = 'none';
+  try {
+    const vulns = await fetchOsvPackageVulns(nodeId);
+    const existingSet = new Set(existingCveIds.map(id => id.toUpperCase()));
+    const extras = vulns.filter(v => {
+      const ids = [v.id, ...(v.aliases || [])].map(a => a.toUpperCase());
+      return !ids.some(a => existingSet.has(a));
+    });
+    if (extras.length === 0) return;
+    titleEl.style.display = 'block';
+    extras.slice(0, 5).forEach(v => {
+      const el = document.createElement('div');
+      el.className = 'osv-extra-cve-item';
+      const summary = v.summary || v.details || 'No description available';
+      const truncated = summary.length > 120 ? summary.substring(0, 120) + '...' : summary;
+      el.innerHTML = `
+        <div class="osv-extra-cve-id">${v.id}</div>
+        <div class="cve-desc">${truncated}</div>
+      `;
+      container.appendChild(el);
+    });
+  } catch (e) {
+    container.innerHTML = `<div class="cve-osv-error">Package query: ${e.message}</div>`;
+  }
+}
+
+function updateFixSummary(totalCves, fixPromises) {
+  const row = document.getElementById('fixSummaryRow');
+  const val = document.getElementById('fixSummaryValue');
+  if (totalCves === 0) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  val.textContent = 'Loading...';
+  val.className = 'fix-summary-value';
+
+  Promise.allSettled(fixPromises).then(results => {
+    let fixCount = 0;
+    results.forEach(r => {
+      if (r.status === 'fulfilled' && r.value && r.value.hasFix) fixCount++;
+    });
+    const ratio = fixCount / totalCves;
+    let cls = 'fix-summary-bad';
+    if (ratio >= 0.7) cls = 'fix-summary-good';
+    else if (ratio >= 0.3) cls = 'fix-summary-warn';
+    val.textContent = `${fixCount}/${totalCves} have fixes`;
+    val.className = `fix-summary-value ${cls}`;
+  });
+}
+
 function showNodeDetail(d) {
   const panel = document.getElementById('node-detail');
   panel.classList.add('visible');
+  requestAnimationFrame(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
   document.getElementById('detailDot').style.background = LAYERS[d.layer].color;
   document.getElementById('detailName').textContent = d.label;
@@ -3214,24 +3542,32 @@ function showNodeDetail(d) {
   document.getElementById('detailMaintainers').textContent = d.maintainers;
   document.getElementById('detailBlast').textContent = d.blast;
 
-  // CVEs
+  // CVEs with OSV enrichment
   const cveContainer = document.getElementById('detailCVEs');
   const cveSectionTitle = document.getElementById('cveSectionTitle');
+  const osvExtraContainer = document.getElementById('osvExtraCVEs');
+  const osvExtraSectionTitle = document.getElementById('osvExtraSectionTitle');
+  const fixSummaryRow = document.getElementById('fixSummaryRow');
   cveContainer.innerHTML = '';
+  osvExtraContainer.innerHTML = '';
+  osvExtraSectionTitle.style.display = 'none';
+  fixSummaryRow.style.display = 'none';
+
+  const fixPromises = [];
+  const existingCveIds = d.cves.map(c => c.id);
+
   if (d.cves.length > 0) {
     cveSectionTitle.style.display = 'block';
     d.cves.forEach(cve => {
-      const cvssColor = cve.cvss >= 9 ? '#ff1744' : cve.cvss >= 7 ? '#ff9100' : '#ffea00';
-      cveContainer.innerHTML += `
-        <div class="cve-item">
-          <div class="cve-id">${cve.id}</div>
-          <div class="cve-desc">${cve.desc}</div>
-          <span class="cve-cvss" style="background:${hexToRGBA(cvssColor, 0.2)};color:${cvssColor};border:1px solid ${hexToRGBA(cvssColor, 0.3)}">CVSS ${cve.cvss}</span>
-        </div>`;
+      const p = renderCveWithOsv(cve, cveContainer);
+      fixPromises.push(p);
     });
+    updateFixSummary(d.cves.length, fixPromises);
   } else {
     cveSectionTitle.style.display = 'none';
   }
+
+  enrichDetailWithOsvPackageQuery(d.id, existingCveIds, osvExtraContainer);
 
   // Attacks
   const attackContainer = document.getElementById('detailAttacks');
